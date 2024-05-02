@@ -1,5 +1,5 @@
 import numpy as np
-from lib.get_source_signal import get_source_signal
+from lib.get_source_signals import get_source_signals
 from lib.get_array_signals import get_array_signals
 from lib.get_reference_signals import get_reference_signals
 from utils.define_array import define_array
@@ -26,7 +26,7 @@ def main() -> None:
     room = define_room()
 
     # Get input signals
-    sources = get_source_signal(macro, sources, params)
+    sources = get_source_signals(macro, sources, params)
 
     # Put the sources in the room
     sources = describe_sources(sources, room)
@@ -35,7 +35,7 @@ def main() -> None:
     array = define_array(room)
 
     # Place the virtual mics pairs
-    cptPts = define_vms(sources)
+    cptPts = define_vms(sources, room)
 
     # Plot the setup
     if macro['PRINT_SETUP']:
@@ -44,11 +44,11 @@ def main() -> None:
     # Compute the microphone signals
     array = get_array_signals(macro, params, sources, room, array)
 
-    # Spherical Parameters
-    spherical_p = define_spherical_p(array)  # todo: array NONE???
-
     # Compute the reference signals at the control points (vms)
-    cptPts = get_reference_signals(macro, params, sources, room, cptPts, spherical_p)
+    cptPts = get_reference_signals(macro, params, sources, room, cptPts)
+
+    # Spherical Parameters
+    spherical_p = define_spherical_p(array)
 
     print('ok')
 

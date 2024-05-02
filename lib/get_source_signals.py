@@ -7,7 +7,7 @@ import utils.plots as plots
 # from icecream import ic
 
 
-def get_source_signal(macro, source, params):
+def get_source_signals(macro, source, params):
     if source['N'] == 2:
         source['signalType'] = ['speech', 'speech']
     else:

@@ -42,7 +42,7 @@ def plot_setup(array, sources, cpt_pts, room):
             plt.scatter(tmp[mm, 0], tmp[mm, 1], s=30, color='blue', marker='o', facecolors='none')
 
     # Draw virtual microphones
-    plt.scatter(cpt_pts['position'][:, 0], cpt_pts['position'][:, 1], s=50, color='k', marker='s', facecolors='none')
+    plt.scatter(cpt_pts['positions'][:, 0], cpt_pts['positions'][:, 1], s=50, color='k', marker='s', facecolors='none')
 
     plt.grid(True)
     plt.axis('equal')
@@ -123,3 +123,21 @@ def debug_get_array_signals(macro, source, room, rir_time, arraySTFT, h_time, ar
     if macro['PRINT_GROUND_arrayDirectSTFT']:
         plot_rirs_stft(arrayDirectSTFT[aa, mm, :, :],
                        f"Convolved ground stft Dir Path of source {i_src + 1}, array {aa + 1}, mic {mm + 1}")
+
+
+def debug_get_reference_signals(macro, source, room, rir_time, testCompleteSTFT, h_time, testDirectSTFT, i_src, vm):
+    if macro['PRINT_GROUND_VM_RIR_TIME']:
+        plot_rirs_time(rir_time, room, source,
+                       f"Ground time RIR of source {i_src + 1}, virtual mic {vm + 1}")
+
+    if macro['PRINT_GROUND_testCompleteSTFT']:
+        plot_rirs_stft(testCompleteSTFT[vm, :, :],
+                       f"Convolved ground stft RIR of source {i_src + 1}, virtual mic {vm + 1}")
+
+    if macro['PRINT_GROUND_VM_H_TIME']:
+        plot_rirs_time(h_time, room, source,
+                       f"Ground time Dir Path of source {i_src + 1}, virtual mic {vm + 1}")
+
+    if macro['PRINT_GROUND_testDirectSTFT']:
+        plot_rirs_stft(testDirectSTFT[vm, :, :],
+                       f"Convolved ground stft Dir Path of source {i_src + 1}, virtual mic {vm + 1}")

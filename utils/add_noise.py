@@ -24,9 +24,9 @@ def add_noise(macro, params, array, array_stft, array_direct_stft=None):
                                                    params['Nfft'], params['Fs'])
 
             if array_direct_stft and macro['COMPUTE_DIR_PATHS']:
-                arrayDirectSignal[aa, mm] = custom_istft(array_direct_stft[aa, mm, :, :], params['analysisWin'],
-                                                         params['synthesisWin'], params['hop'],
-                                                         params['Nfft'], params['Fs'])
+                arrayDirectSignal[aa, mm], tt = custom_istft(array_direct_stft[aa, mm, :, :], params['analysisWin'],
+                                                             params['synthesisWin'], params['hop'],
+                                                             params['Nfft'], params['Fs'])
 
             # Add noise to microphone signals
             varS = np.var(arraySignal[aa, mm])
@@ -34,12 +34,17 @@ def add_noise(macro, params, array, array_stft, array_direct_stft=None):
             noise = np.sqrt(varN) * np.random.randn(len(arraySignal[aa, mm]))
             arraySignal[aa, mm] += noise
 
-            # Update STFT with noise
-            noiseSTFT, _, _ = custom_stft(noise, params['analysisWin'], params['hop'], params['Nfft'], params['Fs'])
+            # Add noise to the STFT
+            noiseSTFT, noise_f, noise_t = custom_stft(noise, params['analysisWin'], params['hop'],
+                                                      params['Nfft'], params['Fs'])
             array_stft[aa, mm, :, :] += noiseSTFT
 
             # Debug
             if macro['PRINT_NoisyArraySignal']:
                 plots.plot_signal_in_time(arraySignal[aa, mm], tt, "rir (x) inputs + noise")
-            # plot noisy arraySTFT
-    return
+                plots.plot_stft(array_stft[aa, mm, :, :], noise_f, noise_t)
+
+    array['arraySignal'] = arraySignal
+    array['arrayDirectSignal'] = arrayDirectSignal
+
+    return array
