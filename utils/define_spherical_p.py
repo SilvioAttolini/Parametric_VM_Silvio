@@ -11,7 +11,7 @@ def define_spherical_p(array):
     ic(array)
 
     sph_params = {
-        'sourcePosition': np.array([0, 0, 0]),
+        'sourcePosition': "",
         'arraySignal': 'estimate',
         'maxOrder': 1,
         'cdrMicN': array['micN'],

@@ -15,6 +15,10 @@ def define_macro():
         'PRINT_GROUND_H_TIME': False,
         'PRINT_GROUND_arrayDirectSTFT': False,
         'COMPUTE_DIR_PATHS': False,
-        'PRINT_NoisyArraySignal': False
+        'PRINT_NoisyArraySignal': False,
+        'PRINT_GROUND_VM_RIR_TIME': True,
+        'PRINT_GROUND_testCompleteSTFT': False,
+        'PRINT_GROUND_VM_H_TIME': False,
+        'PRINT_GROUND_testDirectSTFT': False
     }
     return macro

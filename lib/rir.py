@@ -6,19 +6,26 @@ from lib.sim_microphone import sim_microphone
 
 """
 " RIR
-"   args: params, room, source, array,
-"       iSrc = the current source index
-"       aa = the current array index
-"       mm = the current microphone index
-"       varargin = boolean that de/activate diffuse_time
-"   returns: IR, RTF, res
+"   args: params, room, source, 
+"       array_or_vms = contains the positions of the mic in arrays, or of the vms
+"       [iSrc, aa, mm] when array
+"       [iSrc, vm] when vms
+"       varargin = boolean that de/activates diffuse_time
+"   returns: IR, RTF = rir_time, rirSTFT
 """
 
 
-def rir(params, room, source, array, i_src, aa, mm, varargin):
+def rir(params, room, source, array_or_vms, indices, varargin):
+
+    if len(indices) == 3:
+        i_src, aa, mm = indices[0], indices[1], indices[2]
+        curr_mic_pos = array_or_vms['positions'][aa][mm]  # array
+    else:
+        i_src, vm = indices[0], indices[1]
+        curr_mic_pos = array_or_vms['positions'][vm]  # cptPts (vms)
+
     c = params['c']
-    source_pos = source['position'][i_src]  # maybe mic_pos and s are swapped because of how the rir is calculated???
-    curr_mic_pos = array['positions'][aa][mm]
+    source_pos = source['position'][i_src]
     L = room['dim']
     beta = np.array([room['T60']]) if varargin else np.array([0])
     m_type = source['type'][i_src]
@@ -77,7 +84,7 @@ def rir(params, room, source, array, i_src, aa, mm, varargin):
 
     k = 2 * np.pi * params['f_Ax'] / c
 
-    if diffuse_time:
+    if diffuse_time:  # check?
         early_distance = diffuse_time * c
         direct_distance = scipy.spatial.distance.pdist(res[:3, :].T, source_pos.T)
         [min_val, direct_idx] = np.min(direct_distance, axis=1)
