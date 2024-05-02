@@ -1,11 +1,13 @@
 import numpy as np
 from lib.get_source_signal import get_source_signal
 from lib.get_array_signals import get_array_signals
+from lib.get_reference_signals import get_reference_signals
 from utils.define_array import define_array
 from utils.define_macro import define_macro
 from utils.define_parameters import define_parameters
 from utils.define_room import define_room
 from utils.define_sources import define_sources, describe_sources
+from utils.define_spherical_p import define_spherical_p
 from utils.define_vms import define_vms
 import utils.plots as plots
 from icecream import ic
@@ -41,6 +43,12 @@ def main() -> None:
 
     # Compute the microphone signals
     array = get_array_signals(macro, params, sources, room, array)
+
+    # Spherical Parameters
+    spherical_p = define_spherical_p(array)  # todo: array NONE???
+
+    # Compute the reference signals at the control points (vms)
+    cptPts = get_reference_signals(macro, params, sources, room, cptPts, spherical_p)
 
     print('ok')
 
