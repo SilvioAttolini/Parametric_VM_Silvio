@@ -28,6 +28,9 @@ def compute_rirs_and_convolve(macro, params, sources, room, array):
                 current = sources['STFT'][iSrc] * impRespFrame
                 arraySTFT[aa, mm, :, :] += current
 
+                # Store the results
+                array['arraySTFT'] = arraySTFT
+
                 if macro['COMPUTE_DIR_PATHS']:
                     # Direct path RIR, no walls
                     h_time, h_freq = rir(params, room, sources, array, [(iSrc+1), aa, mm], False)
@@ -37,10 +40,12 @@ def compute_rirs_and_convolve(macro, params, sources, room, array):
                     current = sources['STFT'][iSrc] * hFrame
                     arrayDirectSTFT[aa, mm, :, :] += current
 
-                    # Debug
-                    plots.debug_get_array_signals(macro, sources, room, rir_time, arraySTFT, h_time, arrayDirectSTFT,
-                                                  iSrc, aa, mm)
+                    array['arrayDirectSTFT'] = arrayDirectSTFT
+                else:
+                    h_time, arrayDirectSTFT = None, None
 
-                    return arraySTFT, arrayDirectSTFT
+                # Debug
+                plots.debug_get_array_signals(macro, sources, room, rir_time, arraySTFT, h_time, arrayDirectSTFT,
+                                              iSrc, aa, mm)
 
-    return arraySTFT
+    return array

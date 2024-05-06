@@ -32,7 +32,9 @@ def define_vms(sources, room):
                                                        yy[vm] + sources['position'][ss + 1][1],
                                                        room['z']/2])
 
-    cptPts = {'positions': vms_pos}
+    cptPts = {'positions': vms_pos,
+              'N': sources['N']*len(th_ax)
+              }
 
     # Silvio's distance calculation (to be updated)
     # @distance will be used as parameter to create the
