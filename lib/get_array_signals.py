@@ -22,11 +22,11 @@ import utils.plots as plots
 def get_array_signals(macro, params, sources, room, array):
     print("Computing the microphone signals...")
 
+    array = compute_rirs_and_convolve(macro, params, sources, room, array)
+
     if macro['COMPUTE_DIR_PATHS']:
-        arraySTFT, arrayDirectSTFT = compute_rirs_and_convolve(macro, params, sources, room, array)
-        array = add_noise(macro, params, array, arraySTFT, arrayDirectSTFT)
+        array = add_noise(macro, params, array, array['arraySTFT'], array['arrayDirectSTFT'])
     else:
-        arraySTFT = compute_rirs_and_convolve(macro, params, sources, room, array)
-        array = add_noise(macro, params, array, arraySTFT)
+        array = add_noise(macro, params, array, array['arraySTFT'])
 
     return array

@@ -84,7 +84,8 @@ def plot_signal_in_time(signal, t_ax, title):
 
 
 def plot_rirs_time(rir_time, room, source, title):
-    rir_time = np.reshape(rir_time, (rir_time.shape[1]))
+    if rir_time.ndim > 1:
+        rir_time = np.reshape(rir_time, (rir_time.shape[1]))  # make it a horiz, 1D array
 
     # Create the time axis
     time_conversion_k = source['signalLength']/len(rir_time)
@@ -116,28 +117,35 @@ def debug_get_array_signals(macro, source, room, rir_time, arraySTFT, h_time, ar
         plot_rirs_stft(arraySTFT[aa, mm, :, :],
                        f"Convolved ground stft RIR of source {i_src + 1}, array {aa + 1}, mic {mm + 1}")
 
-    if macro['PRINT_GROUND_H_TIME']:
-        plot_rirs_time(h_time, room, source,
-                       f"Ground time Dir Path of source {i_src + 1}, array {aa + 1}, mic {mm + 1}")
+    if macro['COMPUTE_DIR_PATHS']:
+        if macro['PRINT_GROUND_H_TIME']:
+            plot_rirs_time(h_time, room, source,
+                           f"Ground time Dir Path of source {i_src + 1}, array {aa + 1}, mic {mm + 1}")
 
-    if macro['PRINT_GROUND_arrayDirectSTFT']:
-        plot_rirs_stft(arrayDirectSTFT[aa, mm, :, :],
-                       f"Convolved ground stft Dir Path of source {i_src + 1}, array {aa + 1}, mic {mm + 1}")
+        if macro['PRINT_GROUND_arrayDirectSTFT']:
+            plot_rirs_stft(arrayDirectSTFT[aa, mm, :, :],
+                           f"Convolved ground stft Dir Path of source {i_src + 1}, array {aa + 1}, mic {mm + 1}")
 
 
-def debug_get_reference_signals(macro, source, room, rir_time, testCompleteSTFT, h_time, testDirectSTFT, i_src, vm):
+def debug_get_reference_signals(macro, source, room, rir_time, testCompleteSTFT, arraySignal_time,
+                                h_time, testDirectSTFT, arrayDirectSignal_time, cpt_pts, i_src, vm):
     if macro['PRINT_GROUND_VM_RIR_TIME']:
-        plot_rirs_time(rir_time, room, source,
+        plot_rirs_time(rir_time, room, source,  # 1x8194
                        f"Ground time RIR of source {i_src + 1}, virtual mic {vm + 1}")
+        plot_rirs_time(arraySignal_time[vm], room, source,  # 88064,
+                       f"Ground time Convolved Signal of source {i_src + 1}, virtual mic {vm + 1}")
 
     if macro['PRINT_GROUND_testCompleteSTFT']:
         plot_rirs_stft(testCompleteSTFT[vm, :, :],
                        f"Convolved ground stft RIR of source {i_src + 1}, virtual mic {vm + 1}")
 
-    if macro['PRINT_GROUND_VM_H_TIME']:
-        plot_rirs_time(h_time, room, source,
-                       f"Ground time Dir Path of source {i_src + 1}, virtual mic {vm + 1}")
+    if macro['COMPUTE_DIR_PATHS']:
+        if macro['PRINT_GROUND_VM_H_TIME']:
+            plot_rirs_time(h_time, room, source,
+                           f"Ground time Dir Path of source {i_src + 1}, virtual mic {vm + 1}")
+            plot_rirs_time(arrayDirectSignal_time[vm], room, source,
+                           f"Ground time Convolved Dir Path of source {i_src + 1}, virtual mic {vm + 1}")
 
-    if macro['PRINT_GROUND_testDirectSTFT']:
-        plot_rirs_stft(testDirectSTFT[vm, :, :],
-                       f"Convolved ground stft Dir Path of source {i_src + 1}, virtual mic {vm + 1}")
+        if macro['PRINT_GROUND_testDirectSTFT']:
+            plot_rirs_stft(testDirectSTFT[vm, :, :],
+                           f"Convolved ground stft Dir Path of source {i_src + 1}, virtual mic {vm + 1}")
