@@ -6,7 +6,7 @@
 def define_macro():
     macro = {
         'modelType': 2,  # 1: 2D, 2: 3D
-        'LOCALIZATION_PRS': True,
+        'LOCALIZATION_PRS': True,  # True
         'PRINT_WIENER': False,
         'PRINT_SETUP': False,
         'PRINT_SOURCE_SIGNALS': False,

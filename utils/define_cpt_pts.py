@@ -5,7 +5,7 @@ import numpy as np
 """
 
 
-def define_vms(sources, room):
+def define_cpt_pts(sources, room):
     # Number of vm pairs, for each source
     n_vm_pairs = 2
 

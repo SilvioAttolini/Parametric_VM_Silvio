@@ -8,8 +8,6 @@ from icecream import ic
 
 def define_spherical_p(array):
 
-    ic(array)
-
     sph_params = {
         'sourcePosition': "",
         'arraySignal': 'estimate',

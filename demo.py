@@ -8,7 +8,8 @@ from utils.define_parameters import define_parameters
 from utils.define_room import define_room
 from utils.define_sources import define_sources, describe_sources
 from utils.define_spherical_p import define_spherical_p
-from utils.define_vms import define_vms
+from utils.define_cpt_pts import define_cpt_pts
+from utils.parametric_virtual_miking import parametric_virtual_miking
 import utils.plots as plots
 from icecream import ic
 
@@ -35,7 +36,7 @@ def main() -> None:
     array = define_array(room)
 
     # Place the virtual mics pairs
-    cptPts = define_vms(sources, room)
+    cptPts = define_cpt_pts(sources, room)
 
     # Plot the setup
     if macro['PRINT_SETUP']:
@@ -49,6 +50,9 @@ def main() -> None:
 
     # Spherical Parameters
     spherical_p = define_spherical_p(array)
+
+    # Rebuild (estimate) the VM signals
+    cptPts = parametric_virtual_miking(macro, params, sources, array, cptPts, spherical_p)
 
     print('ok')
 

@@ -16,7 +16,7 @@ def add_noise(macro, params, array, array_stft, array_direct_stft=None):
     arrayDirectSignal_time = np.empty((array['N'], array['micN']), dtype='object')
     for aa in range(array['N']):
         for mm in range(array['micN']):
-            ic(aa, mm)
+            # ic(aa, mm)
 
             # Inverse STFT to obtain time-domain signals of ground rirs convolved with input signals
             arraySignal_time[aa, mm], tt = custom_istft(array_stft[aa, mm, :, :], params['analysisWin'],
