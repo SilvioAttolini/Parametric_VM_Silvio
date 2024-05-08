@@ -3,7 +3,8 @@ from icecream import ic
 from lib.estimate_cdr_no_doa import estimate_cdr_no_doa
 from lib.estimate_psd import estimate_psd
 from lib.estimate_cpsd import estimate_cpsd
-from scipy.spatial.distance import pdist
+from scipy.spatial.distance import cdist
+from lib.estimate_cdr_no_doa import estimate_cdr_no_doa
 
 """
 "
@@ -13,14 +14,16 @@ from scipy.spatial.distance import pdist
 def dereverb_no_doa(macro, params, array):
     print('De-reverberation with no DOA...')
 
-    arraySTFT = array['arraySTFT']
+    arraySTFT = array['arraySTFT']  # array['N'], array['micN'], fLen, tLen
+    array['PSD'] = np.zeros(array['N'], dtype='object')
+    array['crossPSD'] = np.zeros((array['N'], array['micN']), dtype='object')
 
     for aa in range(array['N']):
         # Estimate the PSD
-        array['psd'][aa] = estimate_psd(arraySTFT[aa], params['lambda'])
+        array['PSD'][aa] = estimate_psd(arraySTFT[aa], params['lambda'])
 
         # Get the microphone positions
-        micPosition = array['position'][aa][:, :2]
+        micPosition = np.asmatrix(array['positions'][aa][:, :2], dtype="float")
 
         # Loop over the microphones
         for mm in range(array['micN']):
@@ -30,21 +33,21 @@ def dereverb_no_doa(macro, params, array):
             # Get the next microphone index
             nextMic = (mm + 1) % array['micN']
 
-            # Calculate the microphone distance
-            micDist = pdist(micPosition[mm, :].T, micPosition[nextMic, :].T)
+            # Calculate the microphone distance (mics within each array)
+            micDist = cdist(micPosition[mm, :], micPosition[nextMic, :])[0][0]
 
             # Define the coherence model
-            Cnn = np.sinc(2 * params['f_Ax'] * micDist / params.c)
+            Cnn = np.sinc(2 * params['f_Ax'] * micDist / params['c'])
 
             # Estimate the cross-PSD
-            array.crossPSD[aa][:, :, mm] = (estimate_cpsd(
-                arraySTFT[aa][:, :, mm], arraySTFT[aa][:, :, nextMic], params['lambda']) /
-                np.sqrt(array.psd[aa][:, :, mm] * array.psd[aa][:, :, nextMic]))
+            array['crossPSD'][aa, mm] = (estimate_cpsd(
+                                     arraySTFT[aa, mm, :, :], arraySTFT[aa, nextMic, :, :], params['lambda']) /
+                                     np.sqrt(array['PSD'][aa][mm, :, :] * array['PSD'][aa][nextMic, :, :]))
 
-            # # Estimate the CDR
-            CDR = estimator(array.crossPSD[aa][:, :, mm], Cnn)
-            # CDR = np.maximum(np.real(CDR), 0)
-            #
+            # Estimate the CDR
+            CDR = estimate_cdr_no_doa(array['crossPSD'][aa, mm], Cnn)  # check input dimensions
+            CDR = np.maximum(np.real(CDR), 0)
+
             # # Calculate the weights using spectral subtraction
             # weights = spectral_subtraction(CDR, alpha, beta, mu)
             # weights = np.maximum(weights, floor_)

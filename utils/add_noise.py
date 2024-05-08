@@ -11,9 +11,13 @@ import utils.plots as plots
 """
 
 
-def add_noise(macro, params, array, array_stft, array_direct_stft=None):
+def add_noise(macro, params, array):
+    array_stft = array['arraySTFT']
+    array_direct_stft = array['arrayDirectSTFT'] if macro['COMPUTE_DIR_PATHS'] else None
+
     arraySignal_time = np.empty((array['N'], array['micN']), dtype='object')
     arrayDirectSignal_time = np.empty((array['N'], array['micN']), dtype='object')
+
     for aa in range(array['N']):
         for mm in range(array['micN']):
             # ic(aa, mm)
@@ -23,7 +27,7 @@ def add_noise(macro, params, array, array_stft, array_direct_stft=None):
                                                         params['synthesisWin'], params['hop'],
                                                         params['Nfft'], params['Fs'])
 
-            if macro['COMPUTE_DIR_PATHS'] and array_direct_stft:
+            if macro['COMPUTE_DIR_PATHS']:
                 arrayDirectSignal_time[aa, mm], tt = custom_istft(array_direct_stft[aa, mm, :, :],
                                                                   params['analysisWin'], params['synthesisWin'],
                                                                   params['hop'], params['Nfft'], params['Fs'])

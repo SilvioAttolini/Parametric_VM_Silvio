@@ -23,10 +23,6 @@ def get_array_signals(macro, params, sources, room, array):
     print("Computing the microphone signals...")
 
     array = compute_rirs_and_convolve(macro, params, sources, room, array)
-
-    if macro['COMPUTE_DIR_PATHS']:
-        array = add_noise(macro, params, array, array['arraySTFT'], array['arrayDirectSTFT'])
-    else:
-        array = add_noise(macro, params, array, array['arraySTFT'])
+    array = add_noise(macro, params, array)
 
     return array
