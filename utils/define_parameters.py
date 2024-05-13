@@ -27,7 +27,7 @@ def define_parameters():
     params['synthesisWin'] = np.hamming(params['winLength'])
 
     # frequency axis
-    params['f_Ax'] = np.linspace(0, params['Fs'] // 2, params['Nfft'] // 2 + 1)
-    params['f_len'] = len(params['f_Ax'])
+    params['f_ax'] = np.linspace(0, params['Fs'] // 2, params['Nfft'] // 2 + 1)
+    params['f_len'] = len(params['f_ax'])
 
     return params

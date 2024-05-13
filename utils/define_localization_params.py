@@ -9,7 +9,7 @@ from icecream import ic
 def define_localization_params():
 
     localization_params = {
-        'dereverb': True,
+        'Dereverb': True,
         'secPerPosEstimation': -1,
         'stepAngle': 1,
         'plotPRS': True,

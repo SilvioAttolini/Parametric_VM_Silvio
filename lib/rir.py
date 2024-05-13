@@ -82,7 +82,7 @@ def rir(params, room, source, array_or_vms, indices, varargin):
 
     res = np.array(res)
 
-    k = 2 * np.pi * params['f_Ax'] / c
+    k = 2 * np.pi * params['f_ax'] / c
 
     if diffuse_time:  # check?
         early_distance = diffuse_time * c

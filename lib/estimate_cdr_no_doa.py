@@ -12,8 +12,13 @@ from icecream import ic
 
 def estimate_cdr_no_doa(Cxx, Cnn):
 
+    # Cxx deve essere 4097x165
+    # Cnn deve essere 4097x1
+
     # Extend Cnn to the dimension of Cxx
-    Cnn = np.tile(Cnn, (Cxx.shape[0], 1)) if Cnn.ndim == 1 else Cnn
+    Cnn = (np.tile(Cnn, (Cxx.shape[1], 1))).T
+
+    # Cnn deve essere 4097x165
 
     # Limit the magnitude of Cxx to prevent numerical problems
     magnitude_threshold = 1 - 1e-10

@@ -39,9 +39,9 @@ def get_source_signals(macro, source, params):
         source_signal = tukeywin(len(tmp), 0.99) * tmp
 
         # Compute the STFT
-        source_STFT, _, params['t_Ax'] = custom_stft(source_signal, params['analysisWin'], params['hop'],
+        source_STFT, _, params['t_ax'] = custom_stft(source_signal, params['analysisWin'], params['hop'],
                                                      params['Nfft'], params['Fs'])
-        params['t_len'] = len(params['t_Ax'])
+        params['t_len'] = len(params['t_ax'])
 
         sourceSignal[iSrc] = source_signal
         sourceSTFT[iSrc] = source_STFT

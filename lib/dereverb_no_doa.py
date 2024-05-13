@@ -1,14 +1,18 @@
 import numpy as np
 from icecream import ic
-from lib.estimate_cdr_no_doa import estimate_cdr_no_doa
 from lib.estimate_psd import estimate_psd
 from lib.estimate_cpsd import estimate_cpsd
 from scipy.spatial.distance import cdist
 from lib.estimate_cdr_no_doa import estimate_cdr_no_doa
+from lib.spectral_subtraction import spectral_subtraction
+from fourier.custom_istft import custom_istft
+import utils.plots as plots
 
 """
 "
 """
+
+DEBUG = True
 
 
 def dereverb_no_doa(macro, params, array):
@@ -17,6 +21,9 @@ def dereverb_no_doa(macro, params, array):
     arraySTFT = array['arraySTFT']  # array['N'], array['micN'], fLen, tLen
     array['PSD'] = np.zeros(array['N'], dtype='object')
     array['crossPSD'] = np.zeros((array['N'], array['micN']), dtype='object')
+    array['mask'] = np.zeros((array['N'], array['micN'], params['f_len'], params['t_len']), dtype='object')
+    de_rev_STFT = np.zeros_like(arraySTFT)
+    de_rev_Signal_time = np.zeros_like(array['arraySignal_time'])
 
     for aa in range(array['N']):
         # Estimate the PSD
@@ -28,7 +35,7 @@ def dereverb_no_doa(macro, params, array):
         # Loop over the microphones
         for mm in range(array['micN']):
             # Print progress
-            ic(mm)
+            ic(aa, mm)
 
             # Get the next microphone index
             nextMic = (mm + 1) % array['micN']
@@ -37,7 +44,7 @@ def dereverb_no_doa(macro, params, array):
             micDist = cdist(micPosition[mm, :], micPosition[nextMic, :])[0][0]
 
             # Define the coherence model
-            Cnn = np.sinc(2 * params['f_Ax'] * micDist / params['c'])
+            Cnn = np.sinc(2 * params['f_ax'] * micDist / params['c'])
 
             # Estimate the cross-PSD
             array['crossPSD'][aa, mm] = (estimate_cpsd(
@@ -45,27 +52,37 @@ def dereverb_no_doa(macro, params, array):
                                      np.sqrt(array['PSD'][aa][mm, :, :] * array['PSD'][aa][nextMic, :, :]))
 
             # Estimate the CDR
-            CDR = estimate_cdr_no_doa(array['crossPSD'][aa, mm], Cnn)  # check input dimensions
+            CDR = estimate_cdr_no_doa(array['crossPSD'][aa, mm], Cnn)
             CDR = np.maximum(np.real(CDR), 0)
 
-            # # Calculate the weights using spectral subtraction
-            # weights = spectral_subtraction(CDR, alpha, beta, mu)
-            # weights = np.maximum(weights, floor_)
-            # weights = np.minimum(weights, 1)
-            #
-            # # Calculate the binary mask
-            # array.mask[aa][:, :, mm] = (weights > 0.5).astype(int)
-            #
-            # # Calculate the post-filter signal
-            # inputSignal = np.concatenate((arraySTFT[aa][:, :, mm], arraySTFT[aa][:, :, nextMic]), axis=2)
-            # postFilter = np.sqrt(np.mean(np.abs(inputSignal) ** 2, axis=2)) * np.exp(
-            #     1j * np.angle(arraySTFT[aa][:, :, mm]))
-            #
-            # # Calculate the dereverbed STFT
-            # dereverbSTFT[aa].append(weights * postFilter)
-            #
-            # # Debug
-            # plot the istft of each dereverbered signal
-            # dereverbSignal[aa].append(istft(dereverbSTFT[aa][mm], analysisWin, synthesisWin, hop, Nfft, Fs))
+            # Calculate the weights using spectral subtraction
+            weights = spectral_subtraction(CDR, params['alpha'], params['beta'], params['mu'])
+            weights = np.maximum(weights, params['floor'])
+            weights = np.minimum(weights, 1)
 
-    return dereverbSTFT
+            # Calculate the binary mask using T/F -> 1/0
+            array['mask'][aa, mm, :, :] = (weights > 0.5).astype(int)
+
+            # Calculate the post-filter signal
+            # todo: hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+            # check dimensions!!!
+            input_signal = np.concatenate((arraySTFT[aa, mm, :, :], arraySTFT[aa, nextMic, :, :]), axis=1)
+            post_filter = (np.sqrt(np.mean(np.abs(input_signal) ** 2, axis=2)) *
+                           np.exp(1j * np.angle(arraySTFT[aa, mm, :, :])))
+
+            # Calculate the de-reverbered STFT
+            de_rev_STFT[aa, mm, :, :] = weights * post_filter
+
+            # Debug
+            if DEBUG:
+                # plot the istft of each de-reverbered signal
+                de_rev_Signal_time[aa, mm], tt = custom_istft(de_rev_STFT[aa, mm, :, :], params['analysisWin'],
+                                                              params['synthesisWin'], params['hop'], params['Nfft'],
+                                                              params['Fs'])
+
+                plots.plot_signal_in_time(de_rev_Signal_time[aa, mm], tt, "Dereverbered signals in time")
+
+    # array['derevSTFT'] = de_rev_STFT
+    # array['derevSignal_time'] = de_rev_Signal_time
+
+    return de_rev_STFT

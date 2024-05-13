@@ -13,6 +13,7 @@ def localize_sources(macro, params, sources, array):
     sources_ref_pos = np.zeros((sources['N'], 2))
     for s in range(sources['N']):
         sources_ref_pos[s] = sources['position'][s+1][:2]
+
     if macro['LOCALIZATION_PRS']:
         loc_params = define_localization_params()
         best_pos, median_pos, best_error, median_error = source_localization(macro, params, sources, array, loc_params)
