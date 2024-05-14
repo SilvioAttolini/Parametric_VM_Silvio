@@ -7,7 +7,6 @@ from utils.define_macro import define_macro
 from utils.define_parameters import define_parameters
 from utils.define_room import define_room
 from utils.define_sources import define_sources, describe_sources
-from utils.define_spherical_p import define_spherical_p
 from utils.define_cpt_pts import define_cpt_pts
 from utils.parametric_virtual_miking import parametric_virtual_miking
 import utils.plots as plots
@@ -36,23 +35,20 @@ def main() -> None:
     array = define_array(room)
 
     # Place the virtual mics pairs
-    cptPts = define_cpt_pts(sources, room)
+    cpt_pts = define_cpt_pts(sources, room)
 
     # Plot the setup
     if macro['PRINT_SETUP']:
-        plots.plot_setup(array, sources, cptPts, room)
+        plots.plot_setup(array, sources, cpt_pts, room)
 
     # Compute the microphone signals
     array = get_array_signals(macro, params, sources, room, array)
 
     # Compute the reference signals at the control points (vms)
-    cptPts = get_reference_signals(macro, params, sources, room, cptPts)
-
-    # Spherical Parameters
-    spherical_p = define_spherical_p(array)
+    cpt_pts = get_reference_signals(macro, params, sources, room, cpt_pts)
 
     # Rebuild (estimate) the VM signals
-    cptPts = parametric_virtual_miking(macro, params, sources, array, cptPts, spherical_p)
+    cpt_pts = parametric_virtual_miking(macro, params, sources, array, cpt_pts)
 
     print('ok')
 

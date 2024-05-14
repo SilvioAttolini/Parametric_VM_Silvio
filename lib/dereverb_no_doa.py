@@ -12,10 +12,10 @@ import utils.plots as plots
 "
 """
 
-DEBUG = True
+DEBUG = False
 
 
-def dereverb_no_doa(macro, params, array):
+def dereverb_no_doa(params, array):
     print('De-reverberation with no DOA...')
 
     arraySTFT = array['arraySTFT']  # array['N'], array['micN'], fLen, tLen
@@ -64,10 +64,9 @@ def dereverb_no_doa(macro, params, array):
             array['mask'][aa, mm, :, :] = (weights > 0.5).astype(int)
 
             # Calculate the post-filter signal
-            # todo: hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-            # check dimensions!!!
-            input_signal = np.concatenate((arraySTFT[aa, mm, :, :], arraySTFT[aa, nextMic, :, :]), axis=1)
-            post_filter = (np.sqrt(np.mean(np.abs(input_signal) ** 2, axis=2)) *
+            input_signal = np.array([arraySTFT[aa, mm, :, :], arraySTFT[aa, nextMic, :, :]])
+            # input_signal :: [2,fLen,tLen], while matlab was [fLen,tLen, 2]
+            post_filter = (np.sqrt(np.mean(np.abs(input_signal) ** 2, axis=0)) *
                            np.exp(1j * np.angle(arraySTFT[aa, mm, :, :])))
 
             # Calculate the de-reverbered STFT

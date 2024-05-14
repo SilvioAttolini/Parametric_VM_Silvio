@@ -1,5 +1,5 @@
 from lib.place_array import place_array
-from icecream import ic as qq
+from icecream import ic
 
 """
 " Place the array in the scene
@@ -8,14 +8,15 @@ from icecream import ic as qq
 
 def define_array(room):
     array = {
-        'N': 1,  # 9,            # Number of arrays
+        'N': 2,  # 9,            # Number of arrays
         'micN': 4,         # Number of microphone per array
-        'radius': 0.04     # Radius of the array
+        'R': 1.7,           # Radius of the array structure
+        'radius': 0.04     # Radius of each array
     }
 
     print(f"Placing {array['N']} arrays in the room...")
     array = place_array(array, room)
 
-    # qq(array)
+    # ic(array)
 
     return array
