@@ -19,10 +19,23 @@ import utils.plots as plots
 """
 
 
+STORE = False
+
+
 def get_array_signals(macro, params, sources, room, array):
     print("Computing the microphone signals...")
 
-    array = compute_rirs_and_convolve(macro, params, sources, room, array)
-    array = add_noise(macro, params, array)
+    if STORE:
+        array = compute_rirs_and_convolve(macro, params, sources, room, array)
+        array = add_noise(macro, params, array)
+
+        print("    > Storing...")
+        np.save('debug_storage/arraySTFT.npy', array['arraySTFT'])
+        np.save('debug_storage/arraySignal_time.npy', array['arraySignal_time'])
+
+    else:
+        print("    > Retrieving...")
+        array['arraySTFT'] = np.load('debug_storage/arraySTFT.npy', allow_pickle=True)
+        array['arraySignal_time'] = np.load('debug_storage/arraySignal_time.npy', allow_pickle=True)
 
     return array

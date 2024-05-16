@@ -1,9 +1,8 @@
 import numpy as np
 from icecream import ic
-# from fourier.ext_stft import stft
-# from fourier.ext_istft import istft
 from fourier.custom_stft import custom_stft
 from fourier.custom_istft import custom_istft
+from utils.tt_axis import tt_axis
 import utils.plots as plots
 
 """
@@ -15,12 +14,12 @@ def add_noise(macro, params, array):
     array_stft = array['arraySTFT']
     array_direct_stft = array['arrayDirectSTFT'] if macro['COMPUTE_DIR_PATHS'] else None
 
-    arraySignal_time = np.empty((array['N'], array['micN']), dtype='object')
-    arrayDirectSignal_time = np.empty((array['N'], array['micN']), dtype='object')
+    arraySignal_time = np.zeros((array['N'], array['micN'], tt_axis(params, array_stft[0, 0, :, :])))
+    arrayDirectSignal_time = np.zeros((array['N'], array['micN'], tt_axis(params, array_direct_stft[0, 0, :, :]))) \
+        if macro['COMPUTE_DIR_PATHS'] else None
 
     for aa in range(array['N']):
         for mm in range(array['micN']):
-            # ic(aa, mm)
 
             # Inverse STFT to obtain time-domain signals of ground rirs convolved with input signals
             arraySignal_time[aa, mm], tt = custom_istft(array_stft[aa, mm, :, :], params['analysisWin'],

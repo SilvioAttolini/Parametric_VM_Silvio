@@ -128,7 +128,7 @@ def debug_get_array_signals(macro, source, room, rir_time, arraySTFT, h_time, ar
 
 
 def debug_get_reference_signals(macro, source, room, rir_time, testCompleteSTFT, arraySignal_time,
-                                h_time, testDirectSTFT, arrayDirectSignal_time, cpt_pts, i_src, vm):
+                                testDirectSTFT, arrayDirectSignal_time, cpt_pts, i_src, vm):
     if macro['PRINT_GROUND_VM_RIR_TIME']:
         plot_rirs_time(rir_time, room, source,  # 1x8194
                        f"Ground time RIR of source {i_src + 1}, virtual mic {vm + 1}")
@@ -141,8 +141,8 @@ def debug_get_reference_signals(macro, source, room, rir_time, testCompleteSTFT,
 
     if macro['COMPUTE_DIR_PATHS']:
         if macro['PRINT_GROUND_VM_H_TIME']:
-            plot_rirs_time(h_time, room, source,
-                           f"Ground time Dir Path of source {i_src + 1}, virtual mic {vm + 1}")
+            # plot_rirs_time(h_time, room, source,
+            #                f"Ground time Dir Path of source {i_src + 1}, virtual mic {vm + 1}")
             plot_rirs_time(arrayDirectSignal_time[vm], room, source,
                            f"Ground time Convolved Dir Path of source {i_src + 1}, virtual mic {vm + 1}")
 

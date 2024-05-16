@@ -13,7 +13,7 @@ from lib.estimate_direct_signal import estimate_direct_signal
 
 
 def parametric_virtual_miking(macro, params, sources, array, cpt_pts):
-    print("PARAMETRIC VIRTUAL MIKING")
+    print("\n* PARAMETRIC VIRTUAL MIKING *")
 
     # Localize the sources using ransac
     sources = localize_sources(macro, params, sources, array)

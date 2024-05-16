@@ -12,16 +12,17 @@ from utils.find_positions_and_errors import find_positions_and_errors
 "
 """
 
+tab = "    "
+
 
 def source_localization(macro, params, sources, array, loc_params):
-    print("Localizing the sources...")
 
     if loc_params['Dereverb']:
         dereverbSTFT = dereverb_no_doa(params, array)
     else:
         dereverbSTFT = array['arraySTFT']
 
-    print("Localization based on beamforming...")
+    print(tab+"> Localization based on beamforming...")
 
     # nominal mic pos
     nominal_mic_pos = np.zeros((array['micN'], 2))
@@ -32,18 +33,11 @@ def source_localization(macro, params, sources, array, loc_params):
     theta_ax = np.arange(0, 360, loc_params['stepAngle'])
     theta_ax = np.deg2rad(theta_ax)
 
-    # super directive filter
+    # Super directive filter
     sd_filter = superdirective_filter(nominal_mic_pos, theta_ax, params['f_ax'], params['c'])
 
-    # time axis
-    time_frame_step = 1
-    time_axis = np.arange(0, len(array['t_ax']), time_frame_step)
-
-    # todo: from here onwarddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-
-    # doas and weights
-    all_doa, all_weight = doas_with_weights(sources, array, dereverbSTFT, theta_ax, sd_filter, time_frame_step,
-                                            time_axis)
+    # Doas and weights
+    all_doa, all_weight = doas_with_weights(params, sources, array, dereverbSTFT, theta_ax, sd_filter)
 
     # doas and weights RaySpace
     doa_ray_space, weight_ray_space = doas_with_weights_ray_space(array, all_doa, all_weight)

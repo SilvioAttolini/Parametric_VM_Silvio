@@ -8,22 +8,28 @@ from localization.remove_external_doa import remove_external_doa
 "
 """
 
+tab = "    "
 
-def doas_with_weights(sources, array, dereverb_stft, theta_ax, sd_filter, time_frame_step, time_axis):
 
-    print("calculating doas with weights...")
+def doas_with_weights(params, sources, array, dereverb_stft, theta_ax, sd_filter):
+    print(tab+tab+tab+"> Calculating doas with weights...")
 
-    all_doa = np.zeros(sources['N'], array['N'], len(time_axis))
-    all_weight = np.zeros(sources['N'], array['N'], len(time_axis))
+    # time axis
+    time_frame_step = 1
+    time_axis = np.arange(0, len(params['t_ax']), time_frame_step)
+
+    all_doa = np.zeros((sources['N'], array['N'], len(time_axis)))
+    all_weight = np.zeros((sources['N'], array['N'], len(time_axis)))
 
     for aa in range(array['N']):
         ic("Array: ", aa)
-        for tt, idx in enumerate(time_axis):
-            print(".") if tt % 10 != 0 else print("\n")
+        for idx, tt in enumerate(time_axis):
+            print(".") if idx % 10 != 0 else print("\n")
 
-            stop_frame = np.min(time_frame_step, np.shape(dereverb_stft)[3])  # 3 means tLen
+            stop_frame = np.min([time_frame_step, np.shape(dereverb_stft)[3]])  # 3 means tLen
             mic_signal = dereverb_stft[aa, :, :, tt+stop_frame]
-            mic_signal = np.squeeze(np.mean(mic_signal, axis=2))
+            # mic_signal = np.squeeze(np.mean(mic_signal))  # here a [micN, fLen]. matlab: [fLen, 1, micN]
+            mic_signal = np.mean(mic_signal)  # here a [micN, fLen]. matlab: [fLen, 1, micN]
 
             doa_weight, doa = doa_estimator(mic_signal, sd_filter, theta_ax, [])
 

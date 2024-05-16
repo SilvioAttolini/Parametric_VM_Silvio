@@ -6,6 +6,8 @@ def doa_estimator(signal, H, theta_ax, mask=None):
     if mask is None:
         mask = np.ones_like(signal)
 
+    #sigfnal must be 4097x4 or viceversa
+
     # Apply the mask
     signal[~mask] = 0
 

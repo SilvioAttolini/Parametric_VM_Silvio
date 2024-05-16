@@ -13,10 +13,11 @@ import utils.plots as plots
 """
 
 DEBUG = False
+tab = "    "
 
 
 def dereverb_no_doa(params, array):
-    print('De-reverberation with no DOA...')
+    print(tab+'> De-reverberation with no DOA...')
 
     arraySTFT = array['arraySTFT']  # array['N'], array['micN'], fLen, tLen
     array['PSD'] = np.zeros(array['N'], dtype='object')
@@ -35,7 +36,7 @@ def dereverb_no_doa(params, array):
         # Loop over the microphones
         for mm in range(array['micN']):
             # Print progress
-            ic(aa, mm)
+            # ic(aa, mm)
 
             # Get the next microphone index
             nextMic = (mm + 1) % array['micN']

@@ -8,7 +8,7 @@ def define_macro():
         'modelType': 2,  # 1: 2D, 2: 3D
         'LOCALIZATION_PRS': True,  # True
         'PRINT_WIENER': False,
-        'PRINT_SETUP': True,
+        'PRINT_SETUP': False,
         'PRINT_SOURCE_SIGNALS': False,
         'PRINT_GROUND_RIR_TIME': False,
         'PRINT_GROUND_arraySTFT': False,

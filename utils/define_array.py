@@ -14,7 +14,7 @@ def define_array(room):
         'radius': 0.04     # Radius of each array
     }
 
-    print(f"Placing {array['N']} arrays in the room...")
+    print(f"\nPlacing {array['N']} arrays in the room...")
     array = place_array(array, room)
 
     # ic(array)
