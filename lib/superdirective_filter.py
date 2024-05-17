@@ -42,4 +42,4 @@ def superdirective_filter(micPosition, thetaAx, fAx, c):
 
     H = np.conj(h)
 
-    return H
+    return np.transpose(H, (0, 2, 1))

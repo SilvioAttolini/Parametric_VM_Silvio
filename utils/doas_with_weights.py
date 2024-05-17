@@ -24,18 +24,18 @@ def doas_with_weights(params, sources, array, dereverb_stft, theta_ax, sd_filter
     for aa in range(array['N']):
         ic("Array: ", aa)
         for idx, tt in enumerate(time_axis):
-            print(".") if idx % 10 != 0 else print("\n")
+            print(".", end="") if idx % 10 != 0 else print("\n")
 
             stop_frame = np.min([time_frame_step, np.shape(dereverb_stft)[3]])  # 3 means tLen
-            mic_signal = dereverb_stft[aa, :, :, tt+stop_frame]
-            # mic_signal = np.squeeze(np.mean(mic_signal))  # here a [micN, fLen]. matlab: [fLen, 1, micN]
-            mic_signal = np.mean(mic_signal)  # here a [micN, fLen]. matlab: [fLen, 1, micN]
+            mic_signal = np.reshape(dereverb_stft[aa, :, :, tt+stop_frame],
+                                    (array['micN'], params['f_len'], stop_frame))
+            mic_signal = np.squeeze(np.mean(mic_signal, 2))  # here a [micN, fLen], matlab: [fLen, 1, micN]
 
-            doa_weight, doa = doa_estimator(mic_signal, sd_filter, theta_ax, [])
+            doa_weight, doa = doa_estimator(mic_signal, sd_filter, theta_ax)
 
             # Prune external DOA
-            idx_prev = (aa - 1) % array.N + 1
-            idx_next = (aa + 1) % array.N + 1
+            idx_prev = (aa - 1) % array['N']
+            idx_next = (aa + 1) % array['N']
             tmp_prev = array['centers'][idx_prev] - array['centers'][aa]
             tmp_succ = array['centers'][idx_next] - array['centers'][aa]
             ang_prev = np.arctan2(tmp_prev[1], tmp_prev[0])
@@ -48,7 +48,7 @@ def doas_with_weights(params, sources, array, dereverb_stft, theta_ax, sd_filter
             doa_val = doa_weight[doa_idx]
 
             if not doa_new.any():  # NO DOA FOUND
-                print('-')
+                print('-', end="")
                 doa_new = np.full(sources['N'], np.nan)
                 doa_val = doa_new
 
