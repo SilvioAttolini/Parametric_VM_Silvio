@@ -7,8 +7,14 @@ fprintf('Setting up...\n');
 addpath(genpath('audio'));
 addpath(genpath('fourier'));
 addpath(genpath('lib'));
+addpath(genpath('output_plots'));
+addpath(genpath('storage'));
 addpath(genpath('utils'));
 addpath(genpath('harmonicY'));
+
+% quickload avoids rir calculations
+quickload1 = true;
+quickload2 = false;
 
 % Define useful structures
 macro = define_macro();
@@ -30,29 +36,13 @@ if macro.PRINT_SETUP == true
     plot_setup(room, source, array, cptPts);
 end
 
-pause(99);
-
-%% Compute the microphone signals
-fprintf('Compute the microphone signals...\n');
-source.sourceSTFT = sourceSTFT;
-% [arraySignal, arraySTFT] = getarraysignal(array, source, room, params);
-array = getarraysignal(array, source, room, params);
-
-
-% Compute the reference signals at the contol points
-sphParams.sourcePosition = "";
-sphParams.arraySignal = 'estimate';
-sphParams.maxOrder = 1;
-sphParams.cdrMicN = array.micN;
-sphParams.regParam.method = 'tikhonov';
-sphParams.regParam.nCond = 35;
-sphParams.type = 2;
+%% Compute/Retrieve the microphone signals
+array = get_array_signal(array, source, room, params, quickload1);
 
 % remember that this order is swapped!
-[directReferenceSTFT, completeReferenceSTFT, directSourceReferenceSTFT] = ...
-    getreferencesignal(cptPts, source, room, sphParams, params);
-%display("OK");
-%pause(999);
+cptPts = get_reference_signal(cptPts, source, room, params, quickload2);
+display(cptPts);
+pause(999);
 
 for mm = 1:cptPts.N
     directReference(:,mm) = istft(directReferenceSTFT(:,:,mm), params.analysisWin,...
