@@ -1,4 +1,4 @@
-function [completeEstimate, directEstimate] = parametricvirtualmiking(array, source, cptPts, sphParams, params, macro)
+function cptPts = parametricvirtualmiking(array, source, cptPts, sphParams, params, macro)
 %% parametricvirtualmiking
 % This function performs virtual miking using a parametric technique.
 % Parameters:
@@ -11,6 +11,7 @@ function [completeEstimate, directEstimate] = parametricvirtualmiking(array, sou
 % 22/06/2021
 % v. 0.1
 
+    %%% hereeeeeeeeeeeeeee
 
 %% Localize the sources
 sourcePos = cell2mat(source.position.');
@@ -123,6 +124,7 @@ for mm = 1:cptPts.N
         alignsignals(directEstimate(:,mm), completeEstimate(:,mm), [], ...
         'truncate');
 end
+
 cptPts.directEstimate = directEstimate;
 cptPts.completeEstimate = completeEstimate;
 end

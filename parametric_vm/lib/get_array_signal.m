@@ -4,7 +4,7 @@ function array = get_array_signal(array, source, room, params, quickload)
 % array microphones in the specified room.
 
     if quickload
-        fprintf("Retrieving data...\n");
+        fprintf("Retrieving array data...\n");
         load("storage/array.mat", 'array');
     else
         fprintf("Building real mics' signals...");
