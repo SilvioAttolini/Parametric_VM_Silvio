@@ -41,7 +41,7 @@ quickload2 = true;  % avoids rir calculations
 cptPts = get_reference_signal(cptPts, source, room, params, quickload2);
 
 % Compute the VM signals
-quickload3 = false;  % skips source localization
+quickload3 = true;  % skips source localization
 quickload4 = false;  % skips array dereverberation
 cptPts = parametric_virtual_miking(array, source, cptPts, params, macro, quickload3, quickload4);
 

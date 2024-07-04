@@ -1,4 +1,4 @@
-function array = remove_reverb(array, source, params, macro)
+function array = remove_reverb(array, source, params, macro, quickload)
 
     if quickload
         fprintf("Retrieving dereverberated array data...\n");

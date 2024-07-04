@@ -26,8 +26,7 @@ function array = dereverbarraywithdoa(array, source, params, macro)
     dereverbSignal = cell(array.N, source.N);
 
     p.winLength = 512;
-    p.analysisWin = hamming(p.winLength,'periodic');
-    p.synthesisWin = hamming(p.winLength,'periodic');
+    p.win = hamming(p.winLength,'periodic');
     p.hop = p.winLength / 4;
     p.Nfft = 4*2^nextpow2(p.winLength);
     p.Fs = params.Fs;
@@ -49,7 +48,7 @@ function array = dereverbarraywithdoa(array, source, params, macro)
                 tstSignal = istft(arraySTFT{aa}(:,:,mm), params);
                 tstSignalNextMic = istft(arraySTFT{aa}(:,:,nextMic), params);
 
-                tstFrequency = linspace(0,params.Fs/2, Nfft/2+1)'; % frequency axis
+                tstFrequency = linspace(0,params.Fs/2, p.Nfft/2+1)'; % frequency axis
                 testSTF{aa}(:,:,mm) = stft(tstSignal, p);
                 testSTF{aa}(:,:,nextMic) = stft(tstSignalNextMic, p);
 

@@ -8,7 +8,9 @@ function source = find_source_position(array, source, params, macro, quickload)
         localizationParams.stepAngle = 1;
         localizationParams.plotPRS = false;
         localizationParams.localizationTest = 1000;
+
         if quickload
+            fprintf("Retrieving source localization's info...")
             load("storage/source.mat", 'source');
         else
             source = source_localization(array, source, localizationParams, params, macro);
@@ -21,7 +23,7 @@ function source = find_source_position(array, source, params, macro, quickload)
         source.medianError = 0;
     end
 
-    fprintf('Reference source position(s): [%f, %f]\n', sourcePos(:, 1), sourcePos(:, 1));
+    fprintf('Reference source position(s): [%f, %f]\n', sourcePos(:, 1), sourcePos(:, 2));
     fprintf('Best estimated source position(s): [%f, %f]\n', source.bestPosition(:, 1), source.bestPosition(:, 2));
     fprintf('Best localization Error:  %f\n', source.bestError);
     fprintf('Median estimated source position(s):  [%f, %f]\n', source.medianPosition(:, 1), source.medianPosition(:, 1));

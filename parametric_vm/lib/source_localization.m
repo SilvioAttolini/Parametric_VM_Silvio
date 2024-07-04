@@ -43,7 +43,7 @@ function source = source_localization(array, source, localizationParams, params,
         not_found = 0;
         for idx = 1:length(timeAxis)
             tt = timeAxis(idx);
-            fprintf('\r%d\\%', round(idx*100/length(timeAxis)));
+            fprintf('\r%d', idx);
             dix = dix+1;
 
             stopFrame = min(timeFrameStep, size(dereverbSTFT{aa},2));
