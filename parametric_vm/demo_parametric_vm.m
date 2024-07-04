@@ -48,25 +48,5 @@ quickload6 = true;  % skips estimation of direct signal
 cptPts = parametric_virtual_miking(array, source, cptPts, params, macro, quickload3, ...
                                    quickload4, quickload5, quickload6);
 
-
-
 %% Compute the metrics on the full signal
-fprintf('Compute the signal to diffuse ratio...\n')
-
-powerDirect = sum(directReference.^2, 1);
-powerDirectEstimate = sum(directEstimate.^2, 1);
-
-powerDiffuse = sum((completeReference - directReference).^2,1) ;
-powerDiffuseEstimate = sum((completeEstimate - directEstimate).^2,1);
-
-signalDiffuseRatio = powerDirect ./ powerDiffuse;
-signalDiffuseRatioEstimate = powerDirectEstimate ./ powerDiffuseEstimate;
-
-figure()
-plot(db(signalDiffuseRatio)), hold on
-plot(db(signalDiffuseRatioEstimate))
-ylim([-60, 20]), xlabel('VM index'), ylabel('[dB]');
-legend('GT', 'Estimate')
-title('DRR')
-
-
+metrics(cptPts);

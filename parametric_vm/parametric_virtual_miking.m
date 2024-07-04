@@ -22,17 +22,11 @@ function cptPts = parametricvirtualmiking(array, source, cptPts, params, macro, 
     hCoeff = get_hCoeff(array, source, sphParams, params, macro, quickload5);
 
     %% Estimate the direct signal using the sph expansion
-    [cptPts, array] = get_direct_signal(cptPts, hCoeff, array, source, sphParams, params, macro, quickload6);
+    S = get_direct_signal(cptPts, hCoeff, array, source, sphParams, params, macro, quickload6);
+    cptPts = S.cptPts;
+    array = S.array;
 
     %% Estimate full signal with the diffuse component
     cptPts = estimate_complete_signal(cptPts, array, params);
-
-    for mm = 1:cptPts.N
-        [directEstimate(:,mm), completeEstimate(:,mm)] =  alignsignals(directEstimate(:,mm), ...
-                                                          completeEstimate(:,mm), [], 'truncate');
-    end
-
-    cptPts.directEstimate = directEstimate;
-    cptPts.completeEstimate = completeEstimate;
 
 end

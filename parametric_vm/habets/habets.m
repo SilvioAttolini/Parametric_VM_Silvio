@@ -3,7 +3,7 @@ function couple_signals = habets(params, cptPts, array, cc)
     display(cptPts);
     display(array);
 
-    Fs = params.Fs; % /2;  % for now, then remove /2
+    Fs = params.Fs;
     c = params.c;
     K = 256;  % optimized parameter
     M = cptPts.micN; % calculate the SC between 1 vm couple at a time
@@ -72,6 +72,7 @@ function couple_signals = habets(params, cptPts, array, cc)
     NMSE = 10*log10(sum(((sc_theory)-(sc_generated)).^2)./sum((sc_theory).^2));
 
     Freqs=0:(Fs/2)/(K/2):Fs/2;
+
     % Plot spatial coherence of the pair
     fig = figure('Visible', 'off');
     plot(Freqs/1000,sc_theory,'-k','LineWidth',1.5)

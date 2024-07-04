@@ -81,11 +81,10 @@ function [cptPts, array] = estimatedirectsignal(cptPts, hCoef, array, source, sp
                      sum(abs(cat(2,array.meanDerev{:}).^2)));
     bestScale = fminbnd(nmse, 0, 10);
     directEstimate = bestScale * directEstimate;
-    cptPts.directEstimate = directEstimate;
 
     % return
-    cptPts.directEstimateSTFT = directEstimateSTFT;
-    cptPts.directEstimate = directEstimate;
+    cptPts.estimateDirectSTFT = directEstimateSTFT;
+    cptPts.estimateDirect = directEstimate;
     array.arrayEstimateSTFT = arrayEstimateSTFT;
     array.arrayEstimate = arrayEstimate;
 end
