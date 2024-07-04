@@ -1,7 +1,7 @@
 function couple_signals = habets(params, cptPts, array, cc)
-    display(params);
-    display(cptPts);
-    display(array);
+%    display(params);
+%    display(cptPts);
+%    display(array);
 
     Fs = params.Fs;
     c = params.c;
@@ -9,7 +9,7 @@ function couple_signals = habets(params, cptPts, array, cc)
     M = cptPts.micN; % calculate the SC between 1 vm couple at a time
     d = cptPts.distance;
     % type_nf = 'spherical'; % Type of noise field always assumed to be 3D
-    L = size(cptPts.directEstimate);
+    L = size(cptPts.estimateDirect);
     L = L(1);
 
     %% Pick M mutually 'independent' babble speech input signals

@@ -1,6 +1,6 @@
 function metrics(cptPts)
 
-    fprintf('Compute the signal to diffuse ratio...\n')
+    fprintf('Computing the signal to diffuse ratio...\n')
 
     powerDirect = sum(cptPts.referenceDirect.^2, 1);
     powerDirectEstimate = sum(cptPts.estimateDirect.^2, 1);
@@ -21,6 +21,7 @@ function metrics(cptPts)
     ylabel('[dB]');
     legend('GT', 'Estimate')
     title('DRR')
+    grid on;
     saveas(fig, ['output_plots/Metrics.png']);
     close(fig);
 
