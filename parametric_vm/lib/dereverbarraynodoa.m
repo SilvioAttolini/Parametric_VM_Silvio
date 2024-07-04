@@ -41,7 +41,7 @@ function [dereverbSTFT, dereverbSignal] = dereverbarraynodoa(array, params, macr
 
             dereverbSTFT{aa}(:,:,mm) = weights .* postFilter;
 
-            dereverbSignal{aa}(:,mm) = istft(dereverbSTFT{aa}(:,:,mm), params);
+            dereverbSignal{aa}(:,mm) = my_istft(dereverbSTFT{aa}(:,:,mm), params);
 
             if macro.PRINT_WIENER == true
                 figure()

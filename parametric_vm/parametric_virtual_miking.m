@@ -1,4 +1,5 @@
-function cptPts = parametricvirtualmiking(array, source, cptPts, params, macro, quickload3, quickload4)
+function cptPts = parametricvirtualmiking(array, source, cptPts, params, macro, quickload3, ...
+                                          quickload4, quickload5, quickload6)
     %% parametricvirtualmiking
     % This function performs virtual miking using a parametric technique.
     % Parameters:
@@ -17,53 +18,18 @@ function cptPts = parametricvirtualmiking(array, source, cptPts, params, macro, 
     array = remove_reverb(array, source, params, macro, quickload4);
 
     %% Spherical harmonics expansion estimation
-    sphParams = define_spherical_params(source);
-    hCoeff = spherical_harmonics_estimation(array, source, sphParams, params, macro);
-
-    disp("here");
-    pause(99);
+    sphParams = define_spherical_params(source, array);
+    hCoeff = get_hCoeff(array, source, sphParams, params, macro, quickload5);
 
     %% Estimate the direct signal using the sph expansion
-    [directEstimateSTFT, directSourceEstimate, arrayEstimateSTFT] = estimatedirectsignal(cptPts, hCoeff, array, source, ...
-        sphParams, params, macro);
-
-
-    % direct estimate @ VMs, in time
-    for mm = 1:cptPts.N
-        directEstimate(:,mm) = istft(directEstimateSTFT(:,:,mm), ...
-            params.analysisWin, params.synthesisWin, params.hop, ...
-            params.Nfft, params.Fs);
-    end
-
-    for mm = 1:array.N*array.MicN
-        arrayEstimate(:,mm) = istft(arrayEstimateSTFT(:,:,mm), ...
-            params.analysisWin, params.synthesisWin, params.hop, ...
-            params.Nfft, params.Fs);
-    end
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    minLength = min([size(directEstimate,1),size(array.arraySignal{1}(:,1),1)]);
-
-    nmse = @(x) mean(sum(abs(x * arrayEstimate(1:minLength,:) - ...
-        cat(2,array.meanDerev{:})).^2) ./ sum(abs(cat(2,array.meanDerev{:}).^2)));
-    bestScale = fminbnd(nmse, 0, 10);
-
-    % Scale the estimate for honest evaluation
-    directEstimate = bestScale * directEstimate;
-    cptPts.directEstimate = directEstimate;
+    [cptPts, array] = get_direct_signal(cptPts, hCoeff, array, source, sphParams, params, macro, quickload6);
 
     %% Estimate full signal with the diffuse component
-    %[completeEstimate, diffuseContribution] = estimatecompletesignal(cptPts, array, params);
-
-    % nuovo met
-    [completeEstimate, diffuseContribution] = estimateCompleteRephased(cptPts, array, params);
-
+    cptPts = estimate_complete_signal(cptPts, array, params);
 
     for mm = 1:cptPts.N
-        [directEstimate(:,mm), completeEstimate(:,mm)] = ...
-            alignsignals(directEstimate(:,mm), completeEstimate(:,mm), [], ...
-            'truncate');
+        [directEstimate(:,mm), completeEstimate(:,mm)] =  alignsignals(directEstimate(:,mm), ...
+                                                          completeEstimate(:,mm), [], 'truncate');
     end
 
     cptPts.directEstimate = directEstimate;

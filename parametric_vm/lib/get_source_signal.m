@@ -16,7 +16,7 @@ function [params, source] = get_source_signal(params, source)
         sourceSignal{s} = tukeywin(length(tmp), 0.99)' .* tmp';
         sourceSignal{s} = normalize(sourceSignal{s}');
         sourceSignal{s} = [zeros(size(params.winLength,1)); sourceSignal{s}; zeros(size(params.winLength,1))];
-        [sourceSTFT{s}, ~, source.tAx] = stft(sourceSignal{s}, params);
+        [sourceSTFT{s}, ~, source.tAx] = my_stft(sourceSignal{s}, params);
 
     end
 

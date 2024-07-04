@@ -45,12 +45,12 @@ function array = dereverbarraywithdoa(array, source, params, macro)
                     nextMic =  mod(mm,micN) + 1;
                 end
 
-                tstSignal = istft(arraySTFT{aa}(:,:,mm), params);
-                tstSignalNextMic = istft(arraySTFT{aa}(:,:,nextMic), params);
+                tstSignal = my_istft(arraySTFT{aa}(:,:,mm), params);
+                tstSignalNextMic = my_istft(arraySTFT{aa}(:,:,nextMic), params);
 
                 tstFrequency = linspace(0,params.Fs/2, p.Nfft/2+1)'; % frequency axis
-                testSTF{aa}(:,:,mm) = stft(tstSignal, p);
-                testSTF{aa}(:,:,nextMic) = stft(tstSignalNextMic, p);
+                testSTF{aa}(:,:,mm) = my_stft(tstSignal, p);
+                testSTF{aa}(:,:,nextMic) = my_stft(tstSignalNextMic, p);
 
                 PSD(:,:,mm) = estimate_psd(testSTF{aa}(:,:,mm), params.lambda);
                 PSD(:,:,nextMic) = estimate_psd(testSTF{aa}(:,:,nextMic), params.lambda);
@@ -84,7 +84,7 @@ function array = dereverbarraywithdoa(array, source, params, macro)
                 postFilter = sqrt(mean(abs(inputSignal).^2,3)) .* exp(1j*angle(testSTF{aa}(:,:,mm)));
                 inputDereverb{aa}(:,:,mm) = postFilter;
                 dereverbSTFTLocal = sqrt(weights) .* postFilter;
-                dereverbSignal{aa,iSrc}(:,mm) = istft(dereverbSTFTLocal, p);
+                dereverbSignal{aa,iSrc}(:,mm) = my_istft(dereverbSTFTLocal, p);
 
                 if macro.PRINT_WIENER == true
                     figure()
@@ -138,10 +138,10 @@ function array = dereverbarraywithdoa(array, source, params, macro)
        meanDiffuseSTFTLocal{aa} = diffuseFilter{aa} .*  inputDereverb{aa};
 
        for mm = 1:micN
-           meanDerev{aa}(:,mm) = istft(meanDereverbSTFTLocal(:,:,mm), p);
-           meanDereverbSTFT{aa}(:,:,mm) = stft(meanDerev{aa}(:,mm), params);
-           meanDiffuse{aa}(:,mm) = istft(meanDiffuseSTFTLocal{aa}(:,:,mm), p);
-           meanDiffuseSTFT{aa}(:,:,mm) = stft(meanDiffuse{aa}(:,mm), params);
+           meanDerev{aa}(:,mm) = my_istft(meanDereverbSTFTLocal(:,:,mm), p);
+           meanDereverbSTFT{aa}(:,:,mm) = my_stft(meanDerev{aa}(:,mm), params);
+           meanDiffuse{aa}(:,mm) = my_istft(meanDiffuseSTFTLocal{aa}(:,:,mm), p);
+           meanDiffuseSTFT{aa}(:,:,mm) = my_stft(meanDiffuse{aa}(:,mm), params);
        end
     end
     fprintf("\n");

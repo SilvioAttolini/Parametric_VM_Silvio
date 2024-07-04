@@ -10,7 +10,7 @@ function source = find_source_position(array, source, params, macro, quickload)
         localizationParams.localizationTest = 1000;
 
         if quickload
-            fprintf("Retrieving source localization's info...")
+            fprintf("Retrieving source localization's info...\n")
             load("storage/source.mat", 'source');
         else
             source = source_localization(array, source, localizationParams, params, macro);

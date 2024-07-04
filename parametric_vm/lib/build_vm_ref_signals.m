@@ -29,8 +29,8 @@ function cptPts = build_vm_ref_signals(cptPts, source, room, params)
     cptPts.referenceDirectSTFT = referenceDirectSTFT;
 
     for mm = 1:cptPts.N
-        cptPts.referenceComplete(:,mm) = istft(referenceCompleteSTFT(:,:,mm), params);
-        cptPts.referenceDirect(:,mm) = istft(referenceDirectSTFT(:,:,mm), params);
+        cptPts.referenceComplete(:,mm) = my_istft(referenceCompleteSTFT(:,:,mm), params);
+        cptPts.referenceDirect(:,mm) = my_istft(referenceDirectSTFT(:,:,mm), params);
     end
 
     fprintf("\n");

@@ -7,8 +7,8 @@ function array = add_noise_array_signals(array, params, arraySTFT, arrayDirectST
     for aa = 1:array.N
         fprintf("%d", aa);
         for mm = 1:array.micN
-            arraySignal{aa}(:,mm) = istft(arraySTFT{aa}(:,:,mm), params);
-            arrayDirectSignal{aa}(:,mm) = istft(arrayDirectSTFT{aa}(:,:,mm), params);
+            arraySignal{aa}(:,mm) = my_istft(arraySTFT{aa}(:,:,mm), params);
+            arrayDirectSignal{aa}(:,mm) = my_istft(arrayDirectSTFT{aa}(:,:,mm), params);
 
             varS = var(arraySignal{aa}(:,mm));          % Signal energy
             varN = varS / (10^(params.SNR/10));         % Noise energy
@@ -23,8 +23,8 @@ function array = add_noise_array_signals(array, params, arraySTFT, arrayDirectST
             arraySignal{aa}(:, mm) = highpass(arraySignal{aa}(:, mm), 50, params.Fs);
 
             % STFT the microphone signal
-           noiseSTFT = stft(noise, params);
-           signalSTFT = stft(arraySignal{aa}(:, mm), params);
+           noiseSTFT = my_stft(noise, params);
+           signalSTFT = my_stft(arraySignal{aa}(:, mm), params);
            arraySTFT{aa}(:,:,mm) = signalSTFT + noiseSTFT;
            dix = dix + 1;
         end

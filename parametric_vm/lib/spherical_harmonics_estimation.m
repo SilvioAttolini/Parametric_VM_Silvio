@@ -1,9 +1,8 @@
-function hCoeff = sphericalharmonicsestimation(array, source, sphParams, params, macro)
+function hCoeff = spherical_harmonics_estimation(array, source, sphParams, params, macro)
     %% SPHERICALHARMONICSESTIMATION
     % This function estimates the coefficients of the spherical harmonics
     % expansion
 
-    fprintf('Esimating direct signal spherical harmonics expansion...\n');
     if ~isfield(sphParams,'cdrMicN')
         micPos = cell2mat(array.position);
         micPos = micPos(:,1:2);
@@ -25,7 +24,7 @@ function hCoeff = sphericalharmonicsestimation(array, source, sphParams, params,
     if strcmp(sphParams.arraySignal, 'direct')
         meanDereverbSTFT = arrayDirectSTFT;
     else
-        meanDereverbSTFT = array.meanDerevSTFT;
+        meanDereverbSTFT = array.meanDereverbSTFT;
     end
 
     if strcmp(sphParams.sourcePosition, 'median')
@@ -40,34 +39,34 @@ function hCoeff = sphericalharmonicsestimation(array, source, sphParams, params,
 
     maxOrder = sphParams.maxOrder;               % Spherical harmonics max order
 
-    if macro.modelType == 1   % 2D circular harmonics expansion
-        % Coefficients of the harmonics expansion
-        hCoeff = zeros(length(frequency),(2*maxOrder(1)+1)*source.N,L);
-        for ff = 2:length(frequency)
-            tempSignal = squeeze(micSTFT(ff,:,:)).';
-            k = kvec(ff);
-            basisF = circularbasis(micPos, sourcePos(:,1:2), k, maxOrder, ...
-                type);
-            basisFInv = pinv(basisF);
-            hCoeff(ff,:,:) = (pinv(basisF) * tempSignal);
-        end
-    else   % 3D spherical harmonics expansion
-        % Coefficients of the harmonics expansion
-        hCoeff = zeros(length(frequency),((maxOrder(1)+1)^2)*source.N,L);
-        indexNotZero = correctindexes(maxOrder(1));
-        if source.N == 2
-            indexNotZero = [indexNotZero, ((maxOrder(1)+1)^2)+ indexNotZero];
-        end
-        for ff = 2:length(frequency)
-            tempSignal = squeeze(micSTFT(ff,:,:)).';
-            k = kvec(ff);
-            basisF = sphericalbasis(micPos, sourcePos(:,1:2), k, ...
-                maxOrder, type);
-
-            cleanBasisF = basisF(:,indexNotZero);
-            auxBasisF = svd_inverse_matrix(cleanBasisF, regParam);
-            aux = (auxBasisF * tempSignal);
-            hCoeff(ff,indexNotZero,:) = aux;
-        end
+%    if macro.modelType == 1   % 2D circular harmonics expansion
+%        % Coefficients of the harmonics expansion
+%        hCoeff = zeros(length(frequency),(2*maxOrder(1)+1)*source.N,L);
+%        for ff = 2:length(frequency)
+%            tempSignal = squeeze(micSTFT(ff,:,:)).';
+%            k = kvec(ff);
+%            basisF = circularbasis(micPos, sourcePos(:,1:2), k, maxOrder, ...
+%                type);
+%            basisFInv = pinv(basisF);
+%            hCoeff(ff,:,:) = (pinv(basisF) * tempSignal);
+%        end
+%    else
+    % 3D spherical harmonics expansion
+    % Coefficients of the harmonics expansion
+    hCoeff = zeros(length(frequency),((maxOrder(1)+1)^2)*source.N,L);
+    indexNotZero = correctindexes(maxOrder(1));
+    if source.N == 2
+        indexNotZero = [indexNotZero, ((maxOrder(1)+1)^2)+ indexNotZero];
     end
+    for ff = 2:length(frequency)
+        tempSignal = squeeze(micSTFT(ff,:,:)).';
+        k = kvec(ff);
+        basisF = sphericalbasis(micPos, sourcePos(:,1:2), k, maxOrder, type);
+
+        cleanBasisF = basisF(:,indexNotZero);
+        auxBasisF = svd_inverse_matrix(cleanBasisF, regParam);
+        aux = (auxBasisF * tempSignal);
+        hCoeff(ff,indexNotZero,:) = aux;
+    end
+%    end
 end
