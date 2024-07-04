@@ -1,130 +1,72 @@
-function cptPts = parametricvirtualmiking(array, source, cptPts, sphParams, params, macro)
-%% parametricvirtualmiking
-% This function performs virtual miking using a parametric technique.
-% Parameters:
-%   array: struct containing information on the distributed arrays. 
-%   source: struct containing information on the sources. 
-%   cptPts: struct containing information on the VMs.
-%   sphParams: 
-% 
-% Mirco Pezzoli, 2021
-% 22/06/2021
-% v. 0.1
+function cptPts = parametricvirtualmiking(array, source, cptPts, params, macro, quickload3, quickload4)
+    %% parametricvirtualmiking
+    % This function performs virtual miking using a parametric technique.
+    % Parameters:
+    %   array: struct containing information on the distributed arrays.
+    %   source: struct containing information on the sources.
+    %   cptPts: struct containing information on the VMs.
+    %
+    % Mirco Pezzoli, 2021
+    % 22/06/2021
+    % v. 0.1
 
-    %%% hereeeeeeeeeeeeeee
+    %% Localize the sources
+    source = find_source_position(array, source, params, macro, quickload3);
 
-%% Localize the sources
-sourcePos = cell2mat(source.position.');
-if macro.LOCALIZATION_PRS == true
-    localizationParams.dereverb = true;
-    localizationParams.secPerPosEstimation = -1;
-    localizationParams.stepAngle = 1;
-    localizationParams.plotPRS = false;
-    localizationParams.localizationTest = 1000;
-    [medianPosition, bestPosition, medianError, bestError] = ...
-        sourcelocalization(array, source, localizationParams, params, macro);
-    
-else
-    bestPosition = sourcePos(:,1:2);
-    medianPosition = bestPosition;
-    bestError = 0;
-    medianError = 0;
-end
-fprintf('Best estimated source position(s): \n')
-disp(bestPosition)
-fprintf('Reference source position(s): \n')
-disp(sourcePos)
-fprintf('Best localization Error: \n')
-disp(bestError)
-fprintf('Median estimated source position(s): \n')
-disp(medianPosition)
-fprintf('Median localization Error: \n')
-disp(medianError)
+    % Remove reverberation from the microphone signals
+    array = remove_reverb(array, source, params, macro, quickload4);
 
-source.bestPosition = bestPosition;
-source.medianPosition = medianPosition;
+    %% Spherical harmonics expansion estimation
+    sphParams = define_spherical_params(source);
+    hCoeff = spherical_harmonics_estimation(array, source, sphParams, params, macro);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    disp("here");
+    pause(99);
+
+    %% Estimate the direct signal using the sph expansion
+    [directEstimateSTFT, directSourceEstimate, arrayEstimateSTFT] = estimatedirectsignal(cptPts, hCoeff, array, source, ...
+        sphParams, params, macro);
 
 
-% Remove reverberation from the microphone signals
-dereverbParams.sourcePosition = 'median';
-dereverbParams.cdrMicN = array.micN;
-array.cdrMicN = dereverbParams.cdrMicN;
+    % direct estimate @ VMs, in time
+    for mm = 1:cptPts.N
+        directEstimate(:,mm) = istft(directEstimateSTFT(:,:,mm), ...
+            params.analysisWin, params.synthesisWin, params.hop, ...
+            params.Nfft, params.Fs);
+    end
 
-display("before dereverb with doa");
+    for mm = 1:array.N*array.MicN
+        arrayEstimate(:,mm) = istft(arrayEstimateSTFT(:,:,mm), ...
+            params.analysisWin, params.synthesisWin, params.hop, ...
+            params.Nfft, params.Fs);
+    end
 
-[meanDerev, meanDerevSTFT, meanDiffuse, meanDiffuseSTFT] = dereverbarraywithdoa(array, source, ...
-    dereverbParams, params, macro);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-display("after dereverb with doa");
+    minLength = min([size(directEstimate,1),size(array.arraySignal{1}(:,1),1)]);
 
-array.meanDerev = meanDerev;
-array.meanDerevSTFT = meanDerevSTFT;
-array.meanDiffuse = meanDiffuse;
-array.meanDiffuseSTFT = meanDiffuseSTFT;
+    nmse = @(x) mean(sum(abs(x * arrayEstimate(1:minLength,:) - ...
+        cat(2,array.meanDerev{:})).^2) ./ sum(abs(cat(2,array.meanDerev{:}).^2)));
+    bestScale = fminbnd(nmse, 0, 10);
 
+    % Scale the estimate for honest evaluation
+    directEstimate = bestScale * directEstimate;
+    cptPts.directEstimate = directEstimate;
 
-%% Spherical harmonics expansion estimation
-if isempty(sphParams)
-    sphParams.arraySignal = 'estimate';
-    sphParams.sourcePosition = 'median';
-    sphParams.maxOrder = 1;
-    sphParams.cdrMicN = array.cdrMicN;
-    sphParams.regParam.method = 'tikhonov';
-    sphParams.regParam.nCond = 35;
-    sphParams.type = 2;
-    
-end
-if source.N > 1
-    sphParams.maxOrder = sphParams.maxOrder*ones(1:source.N);  % Spherical harmonics max order
-end
+    %% Estimate full signal with the diffuse component
+    %[completeEstimate, diffuseContribution] = estimatecompletesignal(cptPts, array, params);
 
-hCoeff = sphericalharmonicsestimation(array, source, sphParams, params, macro);
+    % nuovo met
+    [completeEstimate, diffuseContribution] = estimateCompleteRephased(cptPts, array, params);
 
 
-%% Estimate the direct signal using the sph expansion
-[directEstimateSTFT, directSourceEstimate, arrayEstimateSTFT] = estimatedirectsignal(cptPts, hCoeff, array, source, ...
-    sphParams, params, macro);
+    for mm = 1:cptPts.N
+        [directEstimate(:,mm), completeEstimate(:,mm)] = ...
+            alignsignals(directEstimate(:,mm), completeEstimate(:,mm), [], ...
+            'truncate');
+    end
 
+    cptPts.directEstimate = directEstimate;
+    cptPts.completeEstimate = completeEstimate;
 
-% direct estimate @ VMs, in time
-for mm = 1:cptPts.N
-    directEstimate(:,mm) = istft(directEstimateSTFT(:,:,mm), ...
-        params.analysisWin, params.synthesisWin, params.hop, ...
-        params.Nfft, params.Fs);
-end
-
-for mm = 1:array.N*array.cdrMicN
-    arrayEstimate(:,mm) = istft(arrayEstimateSTFT(:,:,mm), ...
-        params.analysisWin, params.synthesisWin, params.hop, ...
-        params.Nfft, params.Fs);
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-minLength = min([size(directEstimate,1),size(array.arraySignal{1}(:,1),1)]);
-
-nmse = @(x) mean(sum(abs(x * arrayEstimate(1:minLength,:) - ...
-    cat(2,array.meanDerev{:})).^2) ./ sum(abs(cat(2,array.meanDerev{:}).^2)));
-bestScale = fminbnd(nmse, 0, 10);
-% Scale the estimate for honest evaluation
-directEstimate = bestScale * directEstimate;
-cptPts.directEstimate = directEstimate;
-
-%% Estimate full signal with the diffuse component
-%[completeEstimate, diffuseContribution] = estimatecompletesignal(cptPts, array, params);
-
-% nuovo met
-[completeEstimate, diffuseContribution] = estimateCompleteRephased(cptPts, array, params);
-
-
-for mm = 1:cptPts.N
-    [directEstimate(:,mm), completeEstimate(:,mm)] = ...
-        alignsignals(directEstimate(:,mm), completeEstimate(:,mm), [], ...
-        'truncate');
-end
-
-cptPts.directEstimate = directEstimate;
-cptPts.completeEstimate = completeEstimate;
 end

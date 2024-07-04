@@ -33,15 +33,17 @@ if macro.PRINT_SETUP == true
 end
 
 %% Compute/Retrieve the microphone signals
-quickload1 = true;  % quickload avoids rir calculations
+quickload1 = true;  % avoids rir calculations
 array = get_array_signal(array, source, room, params, quickload1);
 
 % remember that this order is swapped!
-quickload2 = true;  % quickload avoids rir calculations
+quickload2 = true;  % avoids rir calculations
 cptPts = get_reference_signal(cptPts, source, room, params, quickload2);
 
-% Compute the VM signals!
-cptPts = parametricvirtualmiking(array, source, cptPts, [], params, macro);
+% Compute the VM signals
+quickload3 = false;  % skips source localization
+quickload4 = false;  % skips array dereverberation
+cptPts = parametric_virtual_miking(array, source, cptPts, params, macro, quickload3, quickload4);
 
 %% Compute the metrics on the full signal
 fprintf('Compute the signal to diffuse ratio...\n')

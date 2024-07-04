@@ -1,7 +1,7 @@
 function array = get_array_signal(array, source, room, params, quickload)
-%% GETARRAYSIGNAL
-% This function computes the signals propagating the source signals to the
-% array microphones in the specified room.
+    %% GETARRAYSIGNAL
+    % This function computes the signals propagating the source signals to the
+    % array microphones in the specified room.
 
     if quickload
         fprintf("Retrieving array data...\n");
