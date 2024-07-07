@@ -1,14 +1,10 @@
-function array = add_noise_array_signals(array, params, arraySTFT, arrayDirectSTFT)
+function array = add_noise_array_signals(array, params)
 
-    arraySignal = cell(array.micN, 1);
-    arrayDirectSignal = cell(array.micN, 1);
-
-    dix = 1;
     for aa = 1:array.N
         fprintf("%d", aa);
         for mm = 1:array.micN
-            arraySignal{aa}(:,mm) = my_istft(arraySTFT{aa}(:,:,mm), params);
-            arrayDirectSignal{aa}(:,mm) = my_istft(arrayDirectSTFT{aa}(:,:,mm), params);
+
+            arraySignal = array.arraySignal;
 
             varS = var(arraySignal{aa}(:,mm));          % Signal energy
             varN = varS / (10^(params.SNR/10));         % Noise energy
@@ -20,17 +16,19 @@ function array = add_noise_array_signals(array, params, arraySTFT, arrayDirectST
             arraySignal{aa}(:,mm) = arraySignal{aa}(:,mm) + noise';
 
             % Remove the quasi-continuous contribution
-            arraySignal{aa}(:, mm) = highpass(arraySignal{aa}(:, mm), 50, params.Fs);
+            % tic;
+%            min_f = 50; % Hz
+%            arraySignal{aa}(:, mm) = highpass(arraySignal{aa}(:, mm), min_f, params.Fs);  % very slow, almost 1 sec
+            %disp(toc);
 
-            % STFT the microphone signal
-           noiseSTFT = my_stft(noise, params);
-           signalSTFT = my_stft(arraySignal{aa}(:, mm), params);
-           arraySTFT{aa}(:,:,mm) = signalSTFT + noiseSTFT;
-           dix = dix + 1;
+            % STFT the noisy microphone signal
+%            noiseSTFT = my_stft(noise, params);
+%            signalSTFT = my_stft(arraySignal{aa}(:, mm), params);
+%            arraySTFT{aa}(:,:,mm) = signalSTFT + noiseSTFT;
+            arraySTFT{aa}(:,:,mm) = my_stft(arraySignal{aa}(:, mm), params);
         end
     end
 
-    array.arraySTFT = arraySTFT;
     array.arraySignal = arraySignal;
-    fprintf("\n");
+    array.arraySTFT = arraySTFT;
 end

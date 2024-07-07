@@ -35,16 +35,13 @@ function source = source_localization(array, source, localizationParams, params,
     timeAxis = 1:timeFrameStep:length(tAx)-timeFrameStep;
     allDoa = zeros(source.N, array.N, length(timeAxis));
     allWeight = allDoa;
-    doaHist = cell(size(timeAxis));
     doaVal = cell(size(timeAxis));
-    for aa = 1:array.N            % Averaging signal on time
+    for aa = 1:array.N
         fprintf(['\nArray ', num2str(aa), ':'])
-        dix = 1;
         not_found = 0;
         for idx = 1:length(timeAxis)
             tt = timeAxis(idx);
-            fprintf('\r%d', idx);
-            dix = dix+1;
+            if mod(idx, 10) == 0 fprintf('.'); end
 
             stopFrame = min(timeFrameStep, size(dereverbSTFT{aa},2));
             micSignal = dereverbSTFT{aa}(:, tt+stopFrame, :);

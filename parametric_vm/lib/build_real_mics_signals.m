@@ -1,42 +1,35 @@
-function [arraySTFT, arrayDirectSTFT] = build_real_mics_signals(array, source, room, params)
+function array = build_real_mics_signals(array, source, room, params)
 
     fLen = params.fLen;
     tLen = params.tLen;
-    sourcePos = cell2mat(source.position');
-
-    arraySTFT = cell(array.micN, 1);
-    arrayDirectSTFT = cell(array.micN, 1);
+    time_dim = size(my_istft(source.sourceSTFT{1}, params));
+    time_dim = time_dim(2);
 
     for iSrc = 1:source.N
         for aa = 1:array.N
             fprintf("%d", aa);
             if iSrc == 1
+                arraySignal{aa} = zeros(time_dim, array.micN);
                 arraySTFT{aa} = zeros(fLen, tLen, array.micN);
+                arrayDirectSignal{aa} = zeros(time_dim, array.micN);
                 arrayDirectSTFT{aa} = zeros(fLen, tLen, array.micN);
             end
 
-            arrayPos = cell2mat(array.position(aa));         % Mics coordinates
+            arrayPos = cell2mat(array.position(aa));
 
             for mm = 1:array.micN
-
                 % complete with reverb
-                [~, impResp] = rir(params.c, params.Fs, sourcePos(iSrc,:), arrayPos(mm,:), room.dim, ...
-                                   room.T60, params.Nfft, source.type{iSrc}, room.reflectionOrder, 3, ...
-                                   source.orientation{iSrc}, false, room.diffuseTime);
-
-                impRespFrame = repmat(impResp.', 1, tLen);
-                current = source.sourceSTFT{iSrc} .* impRespFrame;
-                arraySTFT{aa}(:,:,mm) = arraySTFT{aa}(:,:,mm) + current;
-
+                [arraySignal{aa}(:, mm), arraySTFT{aa}(:,:,mm)] = get_mic_sig(...
+                            params, arrayPos(mm,:), room, source, true, iSrc, aa, mm);
                 % direct only
-                [~, h] = rir(params.c, params.Fs, sourcePos(iSrc,:), arrayPos(mm,:), room.dim, 0, params.Nfft,...
-                             source.type{iSrc}, 0, 3, source.orientation{iSrc}, false);
-
-                hFrame = repmat(h.', 1,tLen);
-                current = source.sourceSTFT{iSrc} .* hFrame;
-                arrayDirectSTFT{aa}(:,:,mm) = arrayDirectSTFT{aa}(:,:,mm) + current;
+                [arrayDirectSignal{aa}(:, mm), arrayDirectSTFT{aa}(:,:,mm)] = get_mic_sig(...
+                            params, arrayPos(mm,:), room, source, false, iSrc, aa, mm);
             end
         end
     end
-    fprintf("\n");
+
+    array.arraySignal = arraySignal;
+    array.arraySTFT = arraySTFT;
+    array.arrayDirectSignal = arrayDirectSignal;
+    array.arrayDirectSTFT = arrayDirectSTFT;
 end

@@ -1,5 +1,5 @@
 function [params, source] = get_source_signal(params, source)
-    fprintf('Source signal computation...\n');
+    fprintf('Defining source signal...\n');
 
     sourceSignal = cell(source.N, 1);
     sourceSTFT = cell(source.N, 1);
@@ -16,6 +16,12 @@ function [params, source] = get_source_signal(params, source)
         sourceSignal{s} = tukeywin(length(tmp), 0.99)' .* tmp';
         sourceSignal{s} = normalize(sourceSignal{s}');
         sourceSignal{s} = [zeros(size(params.winLength,1)); sourceSignal{s}; zeros(size(params.winLength,1))];
+
+        % maybe we should add the noise to the source signals here,
+        % not after the derev, so that the mics of the arrays
+        % contain info about the reverberated noise
+        % sourceSignal{s} = add_noise_array_signals() kinda
+
         [sourceSTFT{s}, ~, source.tAx] = my_stft(sourceSignal{s}, params);
 
     end

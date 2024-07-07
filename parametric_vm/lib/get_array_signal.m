@@ -8,12 +8,12 @@ function array = get_array_signal(array, source, room, params, quickload)
         load("storage/array.mat", 'array');
     else
         fprintf("Building real mics' signals...");
-        [arraySTFT, arrayDirectSTFT] = build_real_mics_signals(array, source, room, params);
+        array = build_real_mics_signals(array, source, room, params);
 
-        fprintf("Adding noise...");
-        array = add_noise_array_signals(array, params, arraySTFT, arrayDirectSTFT);
-
+        fprintf("\nAdding noise...");
+        array = add_noise_array_signals(array, params);
         save("storage/array.mat", 'array', '-v7.3');
+        fprintf("\n");
     end
 
 end

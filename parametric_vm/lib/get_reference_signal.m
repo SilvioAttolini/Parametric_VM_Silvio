@@ -8,6 +8,8 @@ function cptPts = get_reference_signal(cptPts, source, room, params, quickload)
     else
         fprintf('Building VMs reference signals...');
         cptPts = build_vm_ref_signals(cptPts, source, room, params);
+        fprintf("\n");
+        save('storage/cptPts.mat', 'cptPts', '-v7.3');
     end
 
 end
