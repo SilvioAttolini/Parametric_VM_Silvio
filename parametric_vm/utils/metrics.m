@@ -1,6 +1,6 @@
 function metrics(cptPts)
 
-    fprintf('Computing the signal to diffuse ratio...\n')
+    fprintf('Computing the signal to diffuse ratio...\n');
 
     powerDirect = sum(cptPts.referenceDirect.^2, 1);
     powerDirectEstimate = sum(cptPts.estimateDirect.^2, 1);
@@ -16,13 +16,27 @@ function metrics(cptPts)
     hold on;
     plot(db(signalDiffuseRatioEstimate))
     hold off;
-    ylim([-60, 20]);
+    %ylim([-60, 20]);
     xlabel('VM index');
     ylabel('[dB]');
     legend('GT', 'Estimate')
     title('DRR')
     grid on;
-    saveas(fig, ['output_plots/Metrics.png']);
+    saveas(fig, ['output_plots/DRR.png']);
+    close(fig);
+
+    nmse = zeros(cptPts.N);
+    for vm = 1:cptPts.N
+        nmse(vm) = new_nmse(cptPts.referenceComplete, cptPts.estimateComplete);
+    end
+
+    fig = figure('Visible', 'off');
+    plot(nmse)
+    xlabel('VM index');
+    ylabel('[NMSE]');
+    title('NMSE')
+    grid on;
+    saveas(fig, ['output_plots/NMSE_complete.png']);
     close(fig);
 
 end

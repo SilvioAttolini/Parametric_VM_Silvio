@@ -35,7 +35,7 @@ function cptPts = estimatedirectsignal(cptPts, hCoef, array, source, sphParams, 
 
     for ss = 1:source.N
         fprintf(['Estimating direct signal for source ', num2str(ss), '...\n']);
-        p_idx(:,ss) = pdist2(cptPts.position,sourcePos(ss,1:2))>0.25;
+        p_idx(:,ss) = pdist2(cptPts.position(:,1:2),sourcePos(ss,1:2))>0.25;
 
         N = sphParams.maxOrder(ss); % Spherical harmonics max order
 

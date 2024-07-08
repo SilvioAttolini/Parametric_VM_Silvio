@@ -13,13 +13,13 @@ function couple_signals = habets(params, cptPts, couple_noise, cc)
     L = L(1);
 
     %% Pick M mutually 'independent' babble speech input signals
-    % Here we should use the non-dereverbereted array signals
-%    data1 = couple_noise(1);
+    % Here we should use the diffuse array signals
+%    data1 = array.meanDiffuse{1};
 %    data1 = data1 + max(data1)*randn(L,1)/1000;  % adding noise
 %    data1 = data1(:); % Ensure data1 is a column vector
 %
-%    data2 = couple_noise(2);
-%    data2 = data2 + max(data5)*randn(L,1)/1000;
+%    data2 = array.meanDiffuse{2};
+%    data2 = data2 + max(data2)*randn(L,1)/1000;
 %    data2 = data2(:); % Ensure data2 is a column vector
 
     data = couple_noise;
