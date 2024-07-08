@@ -1,4 +1,4 @@
-function couple_signals = habets(params, cptPts, array, cc)
+function couple_signals = habets(params, cptPts, couple_noise, cc)
 %    display(params);
 %    display(cptPts);
 %    display(array);
@@ -6,7 +6,7 @@ function couple_signals = habets(params, cptPts, array, cc)
     Fs = params.Fs;
     c = params.c;
     K = 256;  % optimized parameter
-    M = cptPts.micN; % calculate the SC between 1 vm couple at a time
+    M = cptPts.micN; % calculate the SC between one couple at a time
     d = cptPts.distance;
     % type_nf = 'spherical'; % Type of noise field always assumed to be 3D
     L = size(cptPts.estimateDirect);
@@ -14,17 +14,15 @@ function couple_signals = habets(params, cptPts, array, cc)
 
     %% Pick M mutually 'independent' babble speech input signals
     % Here we should use the non-dereverbereted array signals
-    data1 = array.meanDiffuse{1};
-    data1 = data1(:, 1);
-    data1 = data1 + max(data1)*randn(L,1)/1000;  % adding noise
-    data1 = data1(:); % Ensure data1 is a column vector
+%    data1 = couple_noise(1);
+%    data1 = data1 + max(data1)*randn(L,1)/1000;  % adding noise
+%    data1 = data1(:); % Ensure data1 is a column vector
+%
+%    data2 = couple_noise(2);
+%    data2 = data2 + max(data5)*randn(L,1)/1000;
+%    data2 = data2(:); % Ensure data2 is a column vector
 
-    data5 = array.meanDiffuse{5};
-    data5 = data5(:, 1);
-    data5 = data5 + max(data5)*randn(L,1)/1000;
-    data5 = data5(:); % Ensure data2 is a column vector
-
-    data = [data1; data5];
+    data = couple_noise;
     data = data - mean(data);  % removes continuous contribution (?)
 
     babble = zeros(L,M);
@@ -84,9 +82,9 @@ function couple_signals = habets(params, cptPts, array, cc)
     title(sprintf('Inter sensor distance %1.2f m',d));
     legend('Theory',sprintf('Proposed Method (NMSE = %2.1f dB)',NMSE));
     grid on;
-    saveas(fig, ['output_plots/habetsSC_with_noise_couple_', num2str(cc), '.png']);
+    saveas(fig, ['output_plots/SC_couple_', num2str(cc), '.png']);
     close(fig);
 
     % Save babble speech
-    % audiowrite('output_plots/habetsSC_with_noise.wav',x,Fs);
+     audiowrite(['output_audio/SC_couple_', num2str(cc), '.wav'],x,Fs);
 end

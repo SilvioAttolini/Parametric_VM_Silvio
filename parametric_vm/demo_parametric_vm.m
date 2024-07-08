@@ -35,7 +35,7 @@ quickload1 = true;  % avoids rir calculations
 array = get_array_signal(array, source, room, params, quickload1);
 
 % Get ground truth signals at vms
-quickload2 = false;  % avoids rir calculations
+quickload2 = true;  % avoids rir calculations
 cptPts = get_reference_signal(cptPts, source, room, params, quickload2);
 
 % Compute the VM signals

@@ -13,6 +13,7 @@ function cptPts = parametricvirtualmiking(array, source, cptPts, params, macro, 
 
     %% Localize the sources
     source = find_source_position(array, source, params, macro, quickload3);
+    array_with_reverb = array;
 
     % Remove reverberation from the microphone signals
     array = remove_reverb(array, source, params, macro, quickload4);
@@ -22,11 +23,11 @@ function cptPts = parametricvirtualmiking(array, source, cptPts, params, macro, 
     hCoeff = get_hCoeff(array, source, sphParams, params, macro, quickload5);
 
     %% Estimate the direct signal using the sph expansion
-    S = get_direct_signal(cptPts, hCoeff, array, source, sphParams, params, macro, quickload6);
-    cptPts = S.cptPts;
-    array = S.array;
+    cptPts = get_direct_signal(cptPts, hCoeff, array, source, sphParams, params, macro, quickload6);
+%    cptPts = S.cptPts;
+%    array = S.array;
 
     %% Estimate full signal with the diffuse component
-    cptPts = estimate_complete_signal(cptPts, array, params);
+    cptPts = estimate_complete_signal(cptPts, array, array_with_reverb, params);
 
 end

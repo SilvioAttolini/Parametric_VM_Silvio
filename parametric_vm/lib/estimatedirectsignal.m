@@ -1,4 +1,5 @@
-function [cptPts, array] = estimatedirectsignal(cptPts, hCoef, array, source, sphParams, params, macro)
+function cptPts = estimatedirectsignal(cptPts, hCoef, array, source, sphParams, params, macro)
+    % , array]
     %% ESTIMATEDIRECTSIGNAL
     % This function estimate the direct signal of some control points from
     % using the spherical harmonics propagation
@@ -85,6 +86,6 @@ function [cptPts, array] = estimatedirectsignal(cptPts, hCoef, array, source, sp
     % return
     cptPts.estimateDirectSTFT = directEstimateSTFT;
     cptPts.estimateDirect = directEstimate;
-    array.arrayEstimateSTFT = arrayEstimateSTFT;
-    array.arrayEstimate = arrayEstimate;
+%    array.arrayEstimateSTFT = arrayEstimateSTFT;
+%    array.arrayEstimate = arrayEstimate;
 end

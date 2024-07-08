@@ -1,4 +1,4 @@
-function cptPts = estimate_complete_signal(cptPts, array, params)
+function cptPts = estimate_complete_signal(cptPts, array, array_with_reverb, params)
     %% ESTIMATECOMPLETESIGNAL
     % This function estimate the diffuse components and computes the complete
     % signal (direct + diffuse).
@@ -11,7 +11,8 @@ function cptPts = estimate_complete_signal(cptPts, array, params)
     fprintf("couple: ");
     for cc = 1:cptPts.couplesN
         fprintf("%d", cc);
-        curr_couple = habets(params, cptPts, array, cc);
+        couple_noise = extract_noise(array, params, cptPts, vm);
+        curr_couple = habets(params, cptPts, couple_noise, cc);
         diffuseContribution(:, vm) = curr_couple(:, 1);  % micA of the couple
         diffuseContribution(:, vm+1) = curr_couple(:, 2);  % micB of the couple
         vm = vm+cptPts.micN;
