@@ -27,7 +27,7 @@ function metrics(cptPts)
 
     nmse = zeros(cptPts.N);
     for vm = 1:cptPts.N
-        nmse(vm) = new_nmse(cptPts.referenceComplete, cptPts.estimateComplete);
+        nmse(vm) = new_nmse(cptPts.referenceComplete(:, vm), cptPts.estimateComplete(:, vm));
     end
 
     fig = figure('Visible', 'off');

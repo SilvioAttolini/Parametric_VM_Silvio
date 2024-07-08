@@ -1,21 +1,57 @@
 function couple_noise = extract_noise(array, params, cptPts, vm)
 
-    base_diffuse_A = (cptPts.referenceComplete(:, vm) - cptPts.referenceDirect(:, vm))/10;
-    base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/100;
-    base_diffuse_B = (cptPts.referenceComplete(:, vm+1) - cptPts.referenceDirect(:, vm+1))/10;
-    base_diffuse_B = base_diffuse_A + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/100;
+    % best case
+%    base_diffuse_A = (cptPts.referenceComplete(:, vm) - cptPts.referenceDirect(:, vm))/10;
+%    base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/100;
+%    base_diffuse_B = (cptPts.referenceComplete(:, vm+1) - cptPts.referenceDirect(:, vm+1))/10;
+%    base_diffuse_B = base_diffuse_A + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/100;
 
+    arrA = randi([1, 9]);
+    micA = randi([1, 4]);
+    base_diffuse_A = array.arraySignal{arrA}(:, micA)/10;
+    base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/1000;
+
+    % ensure that we use a different starting noise for each mic of the couple
+    searching = true;
+    while searching
+        arrB = randi([1, 9]);
+        if arrB ~= arrA
+            micB = randi([1, 4]);
+            searching = false;
+        else
+            micB = randi([1, 4]);
+            if micB ~= micA
+                searching = false;
+            end
+        end
+    end
+
+    base_diffuse_B = array.arraySignal{arrB}(:, micB)/10;
+    base_diffuse_B = base_diffuse_B + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/1000;
+
+    filename = sprintf('output_plots/Complete_vs_NF_%d%d_%d%d.png', arrA, micA, arrB, micB);
     fig = figure('Visible', 'off');
+    subplot(2,1,1);
     plot(cptPts.referenceComplete(:, vm),'-k','LineWidth',1)
     hold on;
     plot(base_diffuse_A,'-.r','LineWidth',1)
     hold off;
     xlabel('Time');
     ylabel('Amplitude');
+    title("Complete_vs_NF");
+    legend('Complete', 'NF');
+    grid on;
+    subplot(2,1,2);
+    plot(cptPts.referenceComplete(:, vm+1),'-k','LineWidth',1)
+    hold on;
+    plot(base_diffuse_B,'-.r','LineWidth',1)
+    hold off;
+    xlabel('Time');
+    ylabel('Amplitude');
     title("Complete vs NF");
     legend('Complete', 'NF');
     grid on;
-    saveas(fig, ['output_plots/Complete_vs_NF.png']);
+    saveas(fig, filename);
     close(fig);
 
     couple_noise = [base_diffuse_A; base_diffuse_B];

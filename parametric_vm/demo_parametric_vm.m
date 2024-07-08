@@ -42,7 +42,7 @@ cptPts = get_reference_signal(cptPts, source, room, params, quickload2);
 quickload3 = true;  % skips source localization
 quickload4 = true;  % skips array dereverberation
 quickload5 = true;  % skips direct signal spherical harmonics expansion
-quickload6 = false;  % skips estimation of direct signal
+quickload6 = true;  % skips estimation of direct signal
 cptPts = parametric_virtual_miking(array, source, cptPts, params, macro, quickload3, ...
                                    quickload4, quickload5, quickload6);
 

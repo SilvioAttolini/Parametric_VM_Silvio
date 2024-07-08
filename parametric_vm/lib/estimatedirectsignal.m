@@ -57,7 +57,7 @@ function cptPts = estimatedirectsignal(cptPts, hCoef, array, source, sphParams, 
             end
         end
 
-        [outSignalCpts,outSignalCptsSTFT] = propagate(tmpCoeff,cptPts.position,sourcePos(ss,1:2), ...
+        [outSignalCpts,outSignalCptsSTFT] = propagate(tmpCoeff,cptPts.position(:, 1:2),sourcePos(ss,1:2), ...
                                                       N, type, kvec, params, macro.modelType);
 
         tt_ax = 0:1/params.Fs:1/params.Fs*size(outSignalCpts,2);
