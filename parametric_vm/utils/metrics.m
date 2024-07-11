@@ -31,7 +31,7 @@ function metrics(cptPts)
     end
 
     fig = figure('Visible', 'off');
-    plot(nmse)
+    plot(db(nmse))
     xlabel('VM index');
     ylabel('[NMSE]');
     title('NMSE')

@@ -1,41 +1,127 @@
-function couple_noise = extract_noise(array, params, cptPts, vm)
+function couple_diffuse = extract_noise(array, params, cptPts, vm)
 
-    % best cases
-%    base_diffuse_A = (cptPts.referenceComplete(:, vm) - cptPts.referenceDirect(:, vm))/10;
-%%    base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/1000;
-%    base_diffuse_B = (cptPts.referenceComplete(:, vm+1) - cptPts.referenceDirect(:, vm+1))/10;
-%%    base_diffuse_B = base_diffuse_A + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/1000;
-%    filename = sprintf('output_plots/Complete_vs_NF_best_case_%d_%d.png', vm, vm+1);
+    method = "avg";  % "avg", "bst", "rnd"
 
-    % random choice
-    arrA = randi([1, 9]);
-    micA = randi([1, 4]);
-    base_diffuse_A = array.arraySignal{arrA}(:, micA)/10;
-    base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/1000;
+    couple_diffuse = choose_diffuse(array, params, cptPts, vm);
 
-    % ensure that we use a different starting noise for each mic of the couple
-    searching = true;
-    while searching
-        arrB = randi([1, 9]);
-        if arrB ~= arrA
-            micB = randi([1, 4]);
-            searching = false;
-        else
-            micB = randi([1, 4]);
-            if micB ~= micA
-                searching = false;
+end
+
+
+function couple_diffuses = choose_diffuse(method, array, params, cptPts, vm)
+
+    switch lower(method)
+        case 'bst'
+            % best cases
+            base_diffuse_A = cptPts.referenceComplete(:, vm) - cptPts.referenceDirect(:, vm);
+            base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1);
+            base_diffuse_B = cptPts.referenceComplete(:, vm+1) - cptPts.referenceDirect(:, vm+1);
+            base_diffuse_B = base_diffuse_A + max(base_diffuse_B)*randn(length(base_diffuse_B),1);
+            filename = sprintf('output_plots/Complete_vs_NF_best_case_%d_%d.png', vm, vm+1);
+
+        case 'avg'
+            % weighted average
+            diffuses_after_travel = propagate_diffuse_contributions(array, params, cptPts, vm);
+            base_diffuse_A = sum(diffuses_after_travel, 2);  % signals already weighted and delayed
+            diffuses_after_travel = propagate_diffuse_contributions(array, params, cptPts, vm+1);
+            base_diffuse_B = sum(diffuses_after_travel, 2);  % signals already weighted and delayed
+
+        case 'rnd'
+            % random choice
+            arrA = randi([1, 9]);
+            micA = randi([1, 4]);
+            base_diffuse_A = array.meanDiffuse{arrA}(:, micA);
+            base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1);
+
+            % ensure that we use a different starting noise for each mic of the couple
+            searching = true;
+            while searching
+                arrB = randi([1, 9]);
+                if arrB ~= arrA
+                    micB = randi([1, 4]);
+                    searching = false;
+                else
+                    micB = randi([1, 4]);
+                    if micB ~= micA
+                        searching = false;
+                    end
+                end
             end
-        end
+
+            base_diffuse_B = array.meanDiffuse{arrB}(:, micB);
+            base_diffuse_B = base_diffuse_B + max(base_diffuse_B)*randn(length(base_diffuse_B),1);
+            filename = sprintf('output_plots/Complete_vs_NF_%d%d_%d%d.png', arrA, micA, arrB, micB);
     end
 
-    base_diffuse_B = array.arraySignal{arrB}(:, micB)/10;
-    base_diffuse_B = base_diffuse_B + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/1000;
-    filename = sprintf('output_plots/Complete_vs_NF_%d%d_%d%d.png', arrA, micA, arrB, micB);
+    plot_base_diffuses(base_diffuse_A, base_diffuse_B, cptPts, params, vm, filename);
 
+    couple_diffuses = [base_diffuse_A; base_diffuse_B];
+
+end
+
+
+function diffuses_after_travel = propagate_diffuse_contributions(array, params, cptPts, vm)
+
+    diffuses_after_travel = zeros(size(array.meanDiffuse));
+
+    for aa = 1:array.N
+        for mm = 1:array.micN
+
+            mic_pos = array.position{aa}(mm, 1:2);
+            vm_pos = cptPts.position(vm,1:2);
+            dist = norm(mic_pos-vm_pos);
+
+            s_before_travel = array.meanDiffuse{aa}(:,mm);
+
+            fLen = length(s_before_travel);
+            freq = linspace(0,params.Fs/2,fLen/2);
+            freqs = [freq, flip(freq)];
+
+            S_before_travel = fft(s_before_travel, freqs);
+
+            S_after_travel = apply_stokes(S, freqs, dist, params) .* phase_delay(dist, freqs);
+
+            s_after_travel = ifft(S_after_travel, fLen);
+
+            diffuses_after_travel{aa}(:, mm) = s_after_travel;
+
+        end
+    end
+end
+
+
+function S_attenuated = apply_stokes(S, freqs, dist, params)
+
+    %%%
+    % https://en.wikipedia.org/wiki/Stokes%27s_law_of_sound_attenuation
+    %
+    % Here we attenuate the contribution of each frequency bin
+    %
+    %%%
+
+    mu = 16.82;  % Dynamic viscosity, [microPa s] at 20 °C
+    rho = 1.225;  % Density of air, [kg/m^3]
+    c = params.c;  % Speed of sound, 342 [m/s]
+
+    S_attenuated = zeros(size(S));
+    for i = 1:freqs
+        f = freqs(1);
+        S_attenuated(i) = S(i) * exp(- (8*mu*pi^2)*f^2*dist / (3*rho*c^3));  % stoke's eq
+    end
+end
+
+function delay = phase_delay(dist, freqs)
+    delay = exp(-1i*dist*2*pi*freqs/params.c);
+end
+
+
+
+function plot_base_diffuses(base_diffuse_A, base_diffuse_B, cptPts, params, vm, filename)
+
+    tt = linspace(0, length(base_diffuse_A)) / params.Fs;
 
     fig = figure('Visible', 'off');
     subplot(2,1,1);
-    plot(cptPts.referenceComplete(:, vm),'-k','LineWidth',1)
+    plot(tt, cptPts.referenceComplete(:, vm),'-k','LineWidth',1)
     hold on;
     plot(base_diffuse_A,'-.r','LineWidth',1)
     hold off;
@@ -45,7 +131,7 @@ function couple_noise = extract_noise(array, params, cptPts, vm)
     legend('Complete', 'NF');
     grid on;
     subplot(2,1,2);
-    plot(cptPts.referenceComplete(:, vm+1),'-k','LineWidth',1)
+    plot(tt, cptPts.referenceComplete(:, vm+1),'-k','LineWidth',1)
     hold on;
     plot(base_diffuse_B,'-.r','LineWidth',1)
     hold off;
@@ -57,9 +143,13 @@ function couple_noise = extract_noise(array, params, cptPts, vm)
     saveas(fig, filename);
     close(fig);
 
-    couple_noise = [base_diffuse_A; base_diffuse_B];
-
 end
+
+
+
+
+
+
 
 
 
