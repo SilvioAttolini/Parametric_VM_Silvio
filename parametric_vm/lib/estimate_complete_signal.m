@@ -10,13 +10,13 @@ function cptPts = estimate_complete_signal(cptPts, array, array_with_reverb, par
     vm = 1;
     fprintf("couple: ");
     for cc = 1:cptPts.couplesN
+
         fprintf("%d", cc);
         couple_noise = extract_noise(array, params, cptPts, vm);
-%        couple_noise = [array.meanDiffuse{3}; array.meanDiffuse{8}];
         curr_couple = habets(params, cptPts, couple_noise, cc);
         diffuseContribution(:, vm) = curr_couple(:, 1);  % micA of the couple
         diffuseContribution(:, vm+1) = curr_couple(:, 2);  % micB of the couple
-        vm = vm+cptPts.micN;
+        vm = vm+cptPts.micN;  % to next couple
     end
     fprintf("\n");
 

@@ -1,9 +1,7 @@
 function couple_diffuse = extract_noise(array, params, cptPts, vm)
 
-    method = "avg";  % "avg", "bst", "rnd"
-
-    couple_diffuse = choose_diffuse(array, params, cptPts, vm);
-
+    method = "avg";  %  "bst", "avg", "rnd"
+    couple_diffuse = choose_diffuse(method, array, params, cptPts, vm);
 end
 
 
@@ -20,17 +18,18 @@ function couple_diffuses = choose_diffuse(method, array, params, cptPts, vm)
 
         case 'avg'
             % weighted average
-            diffuses_after_travel = propagate_diffuse_contributions(array, params, cptPts, vm);
-            base_diffuse_A = sum(diffuses_after_travel, 2);  % signals already weighted and delayed
-            diffuses_after_travel = propagate_diffuse_contributions(array, params, cptPts, vm+1);
-            base_diffuse_B = sum(diffuses_after_travel, 2);  % signals already weighted and delayed
+            base_diffuse_A = propagate_diffuse_contributions(array, params, cptPts, vm);
+            base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/1000;
+            base_diffuse_B = propagate_diffuse_contributions(array, params, cptPts, vm+1);
+            base_diffuse_B = base_diffuse_B + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/1000;
+            filename = sprintf('output_plots/Complete_vs_NF_wgt_avg_%d_%d.png', vm, vm+1);
 
         case 'rnd'
             % random choice
             arrA = randi([1, 9]);
             micA = randi([1, 4]);
             base_diffuse_A = array.meanDiffuse{arrA}(:, micA);
-            base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1);
+            base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/1000;
 
             % ensure that we use a different starting noise for each mic of the couple
             searching = true;
@@ -48,21 +47,28 @@ function couple_diffuses = choose_diffuse(method, array, params, cptPts, vm)
             end
 
             base_diffuse_B = array.meanDiffuse{arrB}(:, micB);
-            base_diffuse_B = base_diffuse_B + max(base_diffuse_B)*randn(length(base_diffuse_B),1);
+            base_diffuse_B = base_diffuse_B + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/1000;
             filename = sprintf('output_plots/Complete_vs_NF_%d%d_%d%d.png', arrA, micA, arrB, micB);
     end
 
     plot_base_diffuses(base_diffuse_A, base_diffuse_B, cptPts, params, vm, filename);
 
     couple_diffuses = [base_diffuse_A; base_diffuse_B];
-
 end
 
 
-function diffuses_after_travel = propagate_diffuse_contributions(array, params, cptPts, vm)
+function averaged_diffuses = propagate_diffuse_contributions(array, params, cptPts, vm)
 
-    diffuses_after_travel = zeros(size(array.meanDiffuse));
+    % to exploit fft use a number of freqs equal to the
+    % length of the time signal
+    tLen = length(array.meanDiffuse{1}(:,1));
+    fLen = tLen;
+    freq = linspace(0,params.Fs/2,fLen/2);
+    freqs = [freq, flip(freq)];
 
+    diffuses_after_travel = zeros(tLen, array.N*array.micN);
+
+    mic = 1;
     for aa = 1:array.N
         for mm = 1:array.micN
 
@@ -71,21 +77,23 @@ function diffuses_after_travel = propagate_diffuse_contributions(array, params, 
             dist = norm(mic_pos-vm_pos);
 
             s_before_travel = array.meanDiffuse{aa}(:,mm);
+%            S_before_travel = fft(s_before_travel, fLen);
+%            S_after_travel = apply_stokes(S_before_travel, freqs, dist, params) .* phase_delay(dist, freqs, params);
+%            s_after_travel = real(ifft(S_after_travel, fLen));
+%
+%            diffuses_after_travel(:, mic) = s_after_travel;
+            diffuses_after_travel(:, mic) = s_before_travel;
 
-            fLen = length(s_before_travel);
-            freq = linspace(0,params.Fs/2,fLen/2);
-            freqs = [freq, flip(freq)];
-
-            S_before_travel = fft(s_before_travel, freqs);
-
-            S_after_travel = apply_stokes(S, freqs, dist, params) .* phase_delay(dist, freqs);
-
-            s_after_travel = ifft(S_after_travel, fLen);
-
-            diffuses_after_travel{aa}(:, mm) = s_after_travel;
-
+%            plot(s_before_travel);
+%            pause(5);
+%            plot(s_after_travel);
+%            pause(10);
+            mic = mic + 1;
         end
     end
+
+    averaged_diffuses = mean(diffuses_after_travel, 2);  % signals already weighted and delayed, then avg
+
 end
 
 
@@ -98,18 +106,36 @@ function S_attenuated = apply_stokes(S, freqs, dist, params)
     %
     %%%
 
-    mu = 16.82;  % Dynamic viscosity, [microPa s] at 20 °C
+    mu = 16.82; %*10^-6;  % Dynamic viscosity, [Pa s] at 20 °C
     rho = 1.225;  % Density of air, [kg/m^3]
     c = params.c;  % Speed of sound, 342 [m/s]
 
     S_attenuated = zeros(size(S));
-    for i = 1:freqs
-        f = freqs(1);
-        S_attenuated(i) = S(i) * exp(- (8*mu*pi^2)*f^2*dist / (3*rho*c^3));  % stoke's eq
-    end
+%    for i = 1:freqs
+%        f = freqs(i);
+%        S_attenuated(1, i) = S(1, i) * exp(- (8*mu*pi^2)*f^2*dist / (3*rho*c^3));  % stoke's eq
+%    end
+%    display(exp(- (8*mu*pi^2)*freqs(1)^2*dist / (3*rho*c^3)));
+%    display(freqs(1));
+%    display(exp(- (8*mu*pi^2)*freqs(100)^2*dist / (3*rho*c^3)));
+%    display(freqs(100));
+%    display(exp(- (8*mu*pi^2)*freqs(1000)^2*dist / (3*rho*c^3)));
+%    display(freqs(1000));
+%    display(exp(- (8*mu*pi^2)*freqs(1000)^2*dist / (3*rho*c^3)));
+%    display(freqs(10000));
+
+    S_attenuated = S;
+%    pause(2);
+%    plot(abs(S));
+%    pause(10);
+%    plot(abs(S_attenuated));
+%    pause(10);
+
+    S_attenuated = S_attenuated.';
 end
 
-function delay = phase_delay(dist, freqs)
+function delay = phase_delay(dist, freqs, params)
+
     delay = exp(-1i*dist*2*pi*freqs/params.c);
 end
 
@@ -117,11 +143,12 @@ end
 
 function plot_base_diffuses(base_diffuse_A, base_diffuse_B, cptPts, params, vm, filename)
 
-    tt = linspace(0, length(base_diffuse_A)) / params.Fs;
+%    tt = (0:length(base_diffuse_A)-1)/ params.Fs;
+%    display(size(tt));
 
     fig = figure('Visible', 'off');
     subplot(2,1,1);
-    plot(tt, cptPts.referenceComplete(:, vm),'-k','LineWidth',1)
+    plot(cptPts.referenceComplete(:, vm),'-k','LineWidth',1)
     hold on;
     plot(base_diffuse_A,'-.r','LineWidth',1)
     hold off;
@@ -131,7 +158,7 @@ function plot_base_diffuses(base_diffuse_A, base_diffuse_B, cptPts, params, vm, 
     legend('Complete', 'NF');
     grid on;
     subplot(2,1,2);
-    plot(tt, cptPts.referenceComplete(:, vm+1),'-k','LineWidth',1)
+    plot(cptPts.referenceComplete(:, vm+1),'-k','LineWidth',1)
     hold on;
     plot(base_diffuse_B,'-.r','LineWidth',1)
     hold off;
@@ -142,7 +169,6 @@ function plot_base_diffuses(base_diffuse_A, base_diffuse_B, cptPts, params, vm, 
     grid on;
     saveas(fig, filename);
     close(fig);
-
 end
 
 

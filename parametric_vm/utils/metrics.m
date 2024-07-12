@@ -33,7 +33,7 @@ function metrics(cptPts)
     fig = figure('Visible', 'off');
     plot(db(nmse))
     xlabel('VM index');
-    ylabel('[NMSE]');
+    ylabel('[dB]');
     title('NMSE')
     grid on;
     saveas(fig, ['output_plots/NMSE_complete.png']);
