@@ -1,6 +1,6 @@
 function couple_diffuse = extract_noise(array, params, cptPts, vm)
 
-    method = "avg";  %  "bst", "avg", "rnd"
+    method = "bst";  %  "bst", "avg", "rnd"
     couple_diffuse = choose_diffuse(method, array, params, cptPts, vm);
 end
 
@@ -11,24 +11,24 @@ function couple_diffuses = choose_diffuse(method, array, params, cptPts, vm)
         case 'bst'
             % best cases
             base_diffuse_A = cptPts.referenceComplete(:, vm) - cptPts.referenceDirect(:, vm);
-            base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1);
+%            base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/1000;
             base_diffuse_B = cptPts.referenceComplete(:, vm+1) - cptPts.referenceDirect(:, vm+1);
-            base_diffuse_B = base_diffuse_A + max(base_diffuse_B)*randn(length(base_diffuse_B),1);
+%            base_diffuse_B = base_diffuse_A + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/1000;
 
         case 'avg'
             % weighted average
             base_diffuse_A = propagate_diffuse_contributions(array, params, cptPts, vm);
-            base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/1000;
+%            base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/1000;
             base_diffuse_B = propagate_diffuse_contributions(array, params, cptPts, vm+1);
-            base_diffuse_B = base_diffuse_B + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/1000;
+%            base_diffuse_B = base_diffuse_B + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/1000;
 
         case 'rnd'
             % random choice
             [arrA, micA, arrB, micB] = choose_random(array);
             base_diffuse_A = array.meanDiffuse{arrA}(:, micA);
-            base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/1000;
+%            base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/1000;
             base_diffuse_B = array.meanDiffuse{arrB}(:, micB);
-            base_diffuse_B = base_diffuse_B + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/1000;
+%            base_diffuse_B = base_diffuse_B + max(base_diffuse_B)*randn(length(base_diffuse_B),1)/1000;
     end
 
     plot_base_diffuses(base_diffuse_A, base_diffuse_B, cptPts, params, vm, method);
@@ -48,20 +48,24 @@ function weighted_diffuse = propagate_diffuse_contributions(array, params, cptPt
 %    display(weights);
 
     tLen = length(array.meanDiffuse{1}(:,1));
-    diffuses_before_travel = zeros(tLen, array.N*array.micN);
+%    diffuses_before_travel = zeros(tLen, array.N*array.micN);
     diffuses_after_travel = zeros(tLen, array.N*array.micN);
     mic = 1;
     for aa = 1:array.N
         for mm = 1:array.micN
-            diffuses_before_travel(:, mic) = array.meanDiffuse{aa}(:,mm);
-            diffuses_after_travel(:, mic) = diffuses_before_travel(:, mic) * weights(mic);
+            diffuses_after_travel(:, mic) = array.meanDiffuse{aa}(:,mm) * weights(mic);
             mic = mic + 1;
         end
     end
 
+    weighted_diffuse = sum(diffuses_after_travel, 2);
+%    plot(weighted_diffuse);
+%    pause(10);
+%    disp(size(weighted_diffuse));
+%    disp(weighted_diffuse);
+
     % Calculate contribution percentages
     contributions = weights * 100;
-
     filename = sprintf('output_plots/Contribution_of_real_mics_to_vm_Diffuse_%d.png', vm);
     % Plot contributions
     fig = figure('Visible', 'off');
@@ -72,8 +76,6 @@ function weighted_diffuse = propagate_diffuse_contributions(array, params, cptPt
     grid on;
     saveas(fig, filename);
     close(fig);
-
-    weighted_diffuse = sum(diffuses_after_travel(:, 2));
 end
 
 
@@ -119,13 +121,13 @@ function plot_base_diffuses(base_diffuse_A, base_diffuse_B, cptPts, params, vm, 
     end
 
 
-    display(params);
-
-    tt = linspace(0, params.tLen, length(base_diffuse_A));
+%    display(params);
+%
+%    tt = linspace(0, params.tLen, length(base_diffuse_A));
 
     fig = figure('Visible', 'off');
     subplot(2,1,1);
-    plot(tt, cptPts.referenceComplete(:, vm),'-k','LineWidth',1)
+    plot(cptPts.referenceComplete(:, vm),'-k','LineWidth',1)
     hold on;
     plot(base_diffuse_A,'-r','LineWidth',1)
     hold off;
@@ -136,7 +138,7 @@ function plot_base_diffuses(base_diffuse_A, base_diffuse_B, cptPts, params, vm, 
     ylim([-1, 1]);
     grid on;
     subplot(2,1,2);
-    plot(tt, cptPts.referenceComplete(:, vm+1),'-k','LineWidth',1)
+    plot(cptPts.referenceComplete(:, vm+1),'-k','LineWidth',1)
     hold on;
     plot(base_diffuse_B,'-r','LineWidth',1)
     hold off;
