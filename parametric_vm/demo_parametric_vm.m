@@ -31,20 +31,19 @@ cptPts = define_vm(room, source);
 if macro.PRINT_SETUP == true plot_setup(room, source, array, cptPts); end
 
 % Compute/Retrieve the microphone signals
-quickload1 = true;  % avoids rir calculations
+quickload1 = true;  % skips rir calculations
 array = get_array_signal(array, source, room, params, quickload1);
 
 % Get ground truth signals at vms
-quickload2 = true;  % avoids rir calculations
+quickload2 = true;  % skips rir calculations
 cptPts = get_reference_signal(cptPts, source, room, params, quickload2);
 
 % Compute the VM signals
-quickload3 = true;  % skips source localization
-quickload4 = true;  % skips array dereverberation
-quickload5 = true;  % skips direct signal spherical harmonics expansion
-quickload6 = true;  % skips estimation of direct signal
-cptPts = parametric_virtual_miking(array, source, cptPts, params, macro, quickload3, ...
-                                   quickload4, quickload5, quickload6);
+ql3 = true;  % skips source localization
+ql4 = true;  % skips array dereverberation
+ql5 = true;  % skips direct signal spherical harmonics expansion
+ql6 = true;  % skips estimation of direct signal
+cptPts = parametric_virtual_miking(array, source, cptPts, params, macro, ql3, ql4, ql5, ql6);
 
 %% Compute the metrics on the full signal
 metrics(cptPts);

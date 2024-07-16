@@ -1,6 +1,6 @@
 function couple_diffuse = extract_noise(array, params, cptPts, vm)
 
-    method = "bst";  %  "bst", "avg", "rnd"
+    method = "avg";  %  "bst", "avg", "rnd"
     couple_diffuse = choose_diffuse(method, array, params, cptPts, vm);
 end
 
@@ -38,8 +38,13 @@ end
 
 function weighted_diffuse = propagate_diffuse_contributions(array, params, cptPts, vm)
 
+    % il diffuso calcolato qui rimane più basso di quello del caso di riferimento
+    % perchè il diffuso di partenza è quello dei mic reali, che sono più
+    % distanti dalla sorgente rispetto ai vm
+
     positions = cell2mat(array.position);
     dists_realMics_vm = pdist2(cptPts.position(vm,1:2),  positions(:, 1:2));
+    dists_realMics_vm = dists_realMics_vm.^2;
 %    display(dists_realMics_vm);
 
     % Calculate weights (inverse of distances) and Normalize weights to sum to 1
@@ -53,16 +58,16 @@ function weighted_diffuse = propagate_diffuse_contributions(array, params, cptPt
     mic = 1;
     for aa = 1:array.N
         for mm = 1:array.micN
-            diffuses_after_travel(:, mic) = array.meanDiffuse{aa}(:,mm) * weights(mic);
+%            diffuses_after_travel(:, mic) = array.meanDiffuse{aa}(:,mm) * weights(mic);
+
+%            fft_diff = fft(array.meanDiffuse{aa}(:,mm));
+%            diffuses_after_travel(:, mic) = ifft(fft_diff*weights(mic));
+
             mic = mic + 1;
         end
     end
 
     weighted_diffuse = sum(diffuses_after_travel, 2);
-%    plot(weighted_diffuse);
-%    pause(10);
-%    disp(size(weighted_diffuse));
-%    disp(weighted_diffuse);
 
     % Calculate contribution percentages
     contributions = weights * 100;
