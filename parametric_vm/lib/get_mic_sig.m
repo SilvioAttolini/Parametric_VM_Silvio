@@ -3,7 +3,6 @@ function [mic_sig, mic_STFT] = get_mic_sig(params, pos, room, source, reverb, iS
     tLen = params.tLen;
     sourcePos = cell2mat(source.position');
 
-    %    tic;
     if reverb
         [~, impResp] = rir(params.c, params.Fs, sourcePos(iSrc,:), pos, room.dim, ...
                            room.T60, params.Nfft, source.type{iSrc}, room.reflectionOrder, 3, ...
@@ -12,11 +11,15 @@ function [mic_sig, mic_STFT] = get_mic_sig(params, pos, room, source, reverb, iS
         [~, impResp] = rir(params.c, params.Fs, sourcePos(iSrc,:), pos, room.dim, ...
                            0, params.Nfft, source.type{iSrc}, 0, 3, source.orientation{iSrc}, false);
     end
-    %    fprintf('Elapsed time: %.3f seconds\n', toc);
 
     impRespFrame = repmat(impResp.', 1, tLen);
     mic_STFT = source.sourceSTFT{iSrc} .* impRespFrame;
     mic_sig = my_istft(mic_STFT, params);
+
+end
+
+%    tic;
+%    fprintf('Elapsed time: %.3f seconds\n', toc);
 
     % if we add the noise at the source signal, here we have
     % to highpass the rir
@@ -33,12 +36,6 @@ function [mic_sig, mic_STFT] = get_mic_sig(params, pos, room, source, reverb, iS
     %    close(fig);
     %    audiowrite(['output_audio/rir', num2str(aa), num2str(mm), '.wav'], arraySignal{aa}(:, mm),params.Fs);
 %    end
-
-end
-
-
-
-
 
 
 

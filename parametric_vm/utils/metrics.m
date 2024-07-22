@@ -6,7 +6,8 @@ function metrics(cptPts)
     powerDirectEstimate = sum(cptPts.estimateDirect.^2, 1);
 
     powerDiffuse = sum((cptPts.referenceComplete - cptPts.referenceDirect).^2,1) ;
-    powerDiffuseEstimate = sum((cptPts.estimateComplete - cptPts.estimateDirect).^2,1);
+%    powerDiffuseEstimate = sum((cptPts.estimateComplete - cptPts.estimateDirect).^2,1);
+    powerDiffuseEstimate = sum(cptPts.estimateDiffuse.^2, 1);
 
     signalDiffuseRatio = powerDirect ./ powerDiffuse;
     signalDiffuseRatioEstimate = powerDirectEstimate ./ powerDiffuseEstimate;

@@ -17,11 +17,6 @@ function [params, source] = get_source_signal(params, source)
         sourceSignal{s} = normalize(sourceSignal{s}');
         sourceSignal{s} = [zeros(size(params.winLength,1)); sourceSignal{s}; zeros(size(params.winLength,1))];
 
-        % maybe we should add the noise to the source signals here,
-        % not after the derev, so that the mics of the arrays
-        % contain info about the reverberated noise
-        % sourceSignal{s} = add_noise_array_signals() kinda
-
         [sourceSTFT{s}, ~, source.tAx] = my_stft(sourceSignal{s}, params);
 
     end
@@ -33,3 +28,9 @@ function [params, source] = get_source_signal(params, source)
     params.tAx = source.tAx;
 
 end
+
+
+% maybe we should add the noise to the source signals here,
+        % not after the derev, so that the mics of the arrays
+        % contain info about the reverberated noise
+        % sourceSignal{s} = add_noise_array_signals() kinda
