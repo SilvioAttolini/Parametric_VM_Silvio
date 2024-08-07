@@ -20,5 +20,3 @@ function couple_diffuses = choose_diffuse(method, array, params, cptPts, vm)
     plot_diff_diffuses(base_diffuse_A, base_diffuse_B, cptPts, params, vm, method);
     couple_diffuses = [base_diffuse_A; base_diffuse_B];
 end
-
-%    base_diffuse_A = base_diffuse_A + max(base_diffuse_A)*randn(length(base_diffuse_A),1)/1000;
