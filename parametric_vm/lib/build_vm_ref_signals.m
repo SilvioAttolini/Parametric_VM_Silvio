@@ -17,11 +17,11 @@ function cptPts = build_vm_ref_signals(cptPts, source, room, params)
 
             % complete with reverb
             [referenceComplete(:,mm), referenceCompleteSTFT(:,:,mm)] = get_mic_sig(...
-                        params, cptPts.position(mm,:), room, source, true, iSrc, 0, mm);
+                        params, cptPts.position(mm,:), room, source, true, iSrc);
 
             % direct only
             [referenceDirect(:,mm), referenceDirectSTFT(:,:,mm)] = get_mic_sig(...
-                        params, cptPts.position(mm,:), room, source, false, iSrc, 0, mm);
+                        params, cptPts.position(mm,:), room, source, false, iSrc);
         end
     end
 

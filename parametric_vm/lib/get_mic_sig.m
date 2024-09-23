@@ -1,4 +1,4 @@
-function [mic_sig, mic_STFT] = get_mic_sig(params, pos, room, source, reverb, iSrc, aa, mm)
+function [mic_sig, mic_STFT] = get_mic_sig(params, pos, room, source, reverb, iSrc)
 
     tLen = params.tLen;
     sourcePos = cell2mat(source.position');
